@@ -23,11 +23,10 @@ class GpReviewsWatcher(service.Service):
     '''
     name = 'tgrmbot_gp_watcher'
 
-    def __init__(self, db, templateRenderer, l10n_support, gp_login, gp_password,
-                 android_id, poll_period, poll_delay, gp_langs):
+    def __init__(self, db, templateRenderer, gp_login, gp_password, android_id,
+                 poll_period, poll_delay, gp_langs):
         self.db = db
         self.templateRenderer = templateRenderer
-        self.l10n_support = l10n_support
         self.gp_login = gp_login
         self.gp_password = gp_password
         self.android_id = android_id
@@ -104,11 +103,10 @@ class GpReviewsWatcher(service.Service):
                         watchers = yield self.db.get_watchers(app_id)
                         if watchers:
                             chat_ids = [chat_id for _watcher_id, _app_id, chat_id in watchers]
-                            with self.l10n_support.set_locale('en_US'):
-                                messages = [self.templateRenderer.render(NEW_REVIEW_TEMPLATE_NAME,
-                                                                         app={'name': app_name, 'desc': app_desc},
-                                                                         review=review, gp_lang=gp_lang)
-                                            for review in notify_reviews]
+                            messages = [self.templateRenderer.render(NEW_REVIEW_TEMPLATE_NAME,
+                                                                     app={'name': app_name, 'desc': app_desc},
+                                                                     review=review, gp_lang=gp_lang)
+                                        for review in notify_reviews]
                             for chat_id in chat_ids:
                                 yield self._bot.send_messages(chat_id, messages)
 

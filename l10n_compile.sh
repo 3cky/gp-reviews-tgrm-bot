@@ -1,2 +1,2 @@
 #!/bin/sh
-pybabel compile -f -d reviewnotify/locales
+pybabel compile -f -d tgrmbot/locales

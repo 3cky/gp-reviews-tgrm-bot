@@ -120,11 +120,11 @@ class ServiceManager(object):
         langs = [lang.strip() for lang in cfg.get('poll', 'lang').split(',')] \
                 if cfg.has_option('poll', 'lang') else [ DEFAULT_LANG ]
 
-        watcher = GpReviewsWatcher(db, templateRenderer, l10n_support, googleLogin, googlePassword,
+        watcher = GpReviewsWatcher(db, templateRenderer, googleLogin, googlePassword,
                                    androidId, pollPeriod, pollDelay, langs)
         watcher.setServiceParent(application)
 
-        bot = Bot()
+        bot = Bot(db, l10n_support)
         bot.setServiceParent(application)
 
         telegramBot = BotService(plugins=[bot])

@@ -17,7 +17,6 @@ from TelegramBot.plugin.message import MessagePlugin
 from tgrmbot.util import sleep, gp_app_name, gp_app_desc, gp_app_url
 
 import treq
-
 import time
 
 MESSAGE_SEND_DELAY = 1.0 # message send delay in seconds
@@ -28,6 +27,11 @@ class Bot(service.Service, MessagePlugin):
 
     '''
     name = 'tgrmbot_bot'
+
+    def __init__(self, db, l10n_support):
+        self.db = db
+        self.l10n_support = l10n_support
+
 
     def startService(self):
         self._gp_watcher = self.parent.getServiceNamed('tgrmbot_gp_watcher')
@@ -65,15 +69,21 @@ class Bot(service.Service, MessagePlugin):
                 resp = yield self._cmd_watch(chat_id, args)
             elif cmd == '/poll':
                 resp = self._cmd_poll()
+            elif cmd == '/echo':
+                resp = self._cmd_echo(chat_id, args)
         except Exception as e:
             log.err(e, 'Error while handling command \'%s %s\':' % (cmd, args,))
-            resp = 'Error: [%s] (see log file for details)' % str(e)
+            resp = 'ERROR: [%s] (see log file for details)' % str(e)
         defer.returnValue(resp)
+
+
+    def _cmd_echo(self, chat_id, cmd_args):
+        return cmd_args
 
 
     def _cmd_poll(self):
         self._gp_watcher.poll()
-        return 'Ok.'
+        return _(u'Ok.')
 
 
     @defer.inlineCallbacks
@@ -83,7 +93,7 @@ class Bot(service.Service, MessagePlugin):
 
         '''
         if cmd_args is None or not cmd_args:
-            defer.returnValue('Please specify app to watch.')
+            defer.returnValue(_(u'Please specify app to watch.'))
 
         watch_args = cmd_args.split(maxsplit=1)
         watch_args = [w.strip() for w in watch_args]
@@ -102,14 +112,14 @@ class Bot(service.Service, MessagePlugin):
             app_name = app_str
 
         if app_name is None or not app_name:
-            defer.returnValue('Invalid app: %s' % (app_str,))
+            defer.returnValue(_(u'Invalid app: %(app)s') % {'app': app_str})
 
         # reconstruct app gp page url from its symbolic name
         app_url = gp_app_url(app_name)
 
         app_data = yield self._fetch_app_data(app_url)
         if app_data is None:
-            defer.returnValue('App not found: %s' % (app_url,))
+            defer.returnValue(_(u'App not found: %(app_url)s') % {'app_url': app_url})
 
         if app_desc is None:
             # try to extract app description from app page
@@ -120,9 +130,11 @@ class Bot(service.Service, MessagePlugin):
 
         res = yield self._gp_watcher.watch(chat_id, app_name, app_desc)
         if not res:
-            defer.returnValue('Already watching: [%s](%s)' % (app_desc, app_url,))
+            defer.returnValue(_(u'Already watching: [%(app_desc)s](%(app_url)s)') %
+                                {'app_desc': app_desc, 'app_url': app_url})
 
-        defer.returnValue('Added for watching: [%s](%s)' % (app_desc, app_url,))
+        defer.returnValue(_(u'Added for watching: [%(app_desc)s](%(app_url)s)') %
+                                {'app_desc': app_desc, 'app_url': app_url})
 
 
     @defer.inlineCallbacks

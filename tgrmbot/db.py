@@ -30,7 +30,10 @@ class DataStorage(object):
             timestamp INTEGER, rating INTEGER, comment TEXT, lang TEXT)')
         # create watchers table
         yield self._dbpool.runQuery('CREATE TABLE IF NOT EXISTS watchers \
-            (id INTEGER PRIMARY KEY, app_id INTEGER, chat_id INTEGER)')
+            (id INTEGER PRIMARY KEY, app_id INTEGER, chat_id TEXT)')
+        # create chat settings table
+        yield self._dbpool.runQuery('CREATE TABLE IF NOT EXISTS chat_settings \
+            (chat_id TEXT UNIQUE, locale TEXT)')
 
 
     def get_apps(self):
@@ -118,3 +121,27 @@ class DataStorage(object):
         Get watchers for an application.
         '''
         return self._dbpool.runQuery('SELECT * FROM watchers WHERE app_id = ?', (app_id,))
+
+
+    def get_chat_settings(self, chat_id):
+        '''
+        Get chat settings (locale, etc).
+        '''
+        return self._dbpool.runQuery('SELECT * FROM chat_settings WHERE chat_id = ?', (chat_id,))
+
+
+    def add_chat_settings(self, chat_id, chat_locale):
+        '''
+        Add chat settings.
+        '''
+        return self._dbpool.runQuery('INSERT INTO chat_settings (chat_id, locale) VALUES (?, ?)',
+                                     (chat_id, chat_locale,))
+
+
+    def update_chat_settings(self, chat_id, chat_locale):
+        '''
+        Update chat settings.
+        '''
+        return self._dbpool.runQuery('UPDATE chat_settings SET locale = ? WHERE chat_id = ?',
+                                     (chat_locale, chat_id,))
+

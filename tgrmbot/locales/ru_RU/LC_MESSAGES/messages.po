@@ -5,46 +5,48 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-07-16 20:18+0300\n"
+"POT-Creation-Date: 2017-02-24 19:45+0300\n"
 "PO-Revision-Date: 2015-07-16 12:30+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ru_RU\n"
 "Language-Team: ru_RU <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n==1 ? 0 : 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 1.3\n"
+"Generated-By: Babel 2.3.4\n"
 
-#: reviewnotify/templates/reviews.txt:1
-#, fuzzy
-msgid "New review"
-msgid_plural "New reviews"
-msgstr[0] "Новая оценка"
-msgstr[1] "Новые оценки"
+#: tgrmbot/bot.py:86
+msgid "Ok."
+msgstr "Готово."
 
-#: reviewnotify/templates/reviews.txt:1
-msgid "for"
-msgstr "для"
+#: tgrmbot/bot.py:96
+msgid "Please specify app to watch."
+msgstr "Укажите приложение для отслеживания!"
 
-#: reviewnotify/templates/reviews.txt:1
-msgid "app"
-msgstr "приложения"
+#: tgrmbot/bot.py:115
+#, python-format
+msgid "Invalid app: %(app)s"
+msgstr "Неправильное приложение: %(app)s"
 
-#: reviewnotify/templates/reviews.txt:3
+#: tgrmbot/bot.py:122
+#, python-format
+msgid "App not found: %(app_url)s"
+msgstr "Приложение не найдено: %(app_url)s"
+
+#: tgrmbot/bot.py:133
+#, python-format
+msgid "Already watching: [%(app_desc)s](%(app_url)s)"
+msgstr "Уже отслеживается: [%(app_desc)s](%(app_url)s)"
+
+#: tgrmbot/bot.py:136
+#, python-format
+msgid "Added for watching: [%(app_desc)s](%(app_url)s)"
+msgstr "Добавлено в отслеживаемые: [%(app_desc)s](%(app_url)s)"
+
+#: tgrmbot/templates/review_new.md:1
 msgid "Date"
 msgstr "Дата"
-
-#: reviewnotify/templates/reviews.txt:4
-msgid "Rating"
-msgstr "Рейтинг"
-
-#: reviewnotify/templates/reviews.txt:5
-msgid "Comment"
-msgstr "Комментарий"
-
-#: reviewnotify/templates/reviews.txt:6
-msgid "Link"
-msgstr "Ссылка"
 
 #~ msgid "New"
 #~ msgstr ""
@@ -53,4 +55,25 @@ msgstr "Ссылка"
 #~ msgid_plural "commits"
 #~ msgstr[0] ""
 #~ msgstr[1] ""
+
+#~ msgid "New review"
+#~ msgstr ""
+
+#~ msgid "New reviews"
+#~ msgstr ""
+
+#~ msgid "for"
+#~ msgstr ""
+
+#~ msgid "app"
+#~ msgstr ""
+
+#~ msgid "Rating"
+#~ msgstr ""
+
+#~ msgid "Comment"
+#~ msgstr "Новая оценка"
+
+#~ msgid "Link"
+#~ msgstr "Новые оценки"
 

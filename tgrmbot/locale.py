@@ -4,12 +4,8 @@ Created on 24-Feb-2017
 @author: 3cky
 '''
 
-from contextlib import contextmanager
-
-import locale
-
+from gettext import translation
 import babel.support
-
 import pkg_resources
 
 LOCALES = ['en_US', 'ru_RU']
@@ -20,29 +16,29 @@ class LocalizationSupport(object):
 
     '''
 
-    def __init__(self, default_lang):
-        self.default_lang = default_lang
-        localeDir = pkg_resources.resource_filename('tgrmbot', 'locales')
-        self.translations = babel.support.Translations.load(dirname=localeDir, locales=LOCALES)
+    def __init__(self, lang):
+        self.locale = self.to_locale(lang)
+        locale_dir = pkg_resources.resource_filename('tgrmbot', 'locales')
+        self.translations = babel.support.Translations.load(dirname=locale_dir,
+                                                            locales=[self.locale])
+        t = translation('messages', localedir=locale_dir, languages=[self.locale])
+        t.install()
 
 
     def get_locales(self):
         return LOCALES
 
 
+    def get_locale(self):
+        return self.locale
+
+
+    def to_locale(self, lang):
+        for l in self.get_locales():
+            if l.startswith(lang):
+                return l
+        return None
+
+
     def get_translations(self):
         return self.translations
-
-
-    @contextmanager
-    def set_locale(self, l):
-        """
-        Temporarily overrides the currently set locale.
-        :param l: The locale to temporary switch to (ex: 'en_US').
-        """
-        orig_locale = locale.getlocale()
-        try:
-            locale.setlocale(locale.LC_ALL, l)
-            yield
-        finally:
-            locale.setlocale(locale.LC_ALL, orig_locale)
