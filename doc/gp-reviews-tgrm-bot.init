@@ -1,0 +1,55 @@
+#!/bin/bash
+# Telegram notifications about Google Play apps reviews
+#
+# chkconfig: - 90 10
+# description: gp-reviews-tgrm-bot
+# processname: gp-reviews-tgrm-bot
+# pidfile: /var/run/gp-reviews-tgrm-bot.pid
+
+. /etc/rc.d/init.d/functions
+
+name=gp-reviews-tgrm-bot
+
+#####################
+#BEGIN CONFIG SECTION
+
+#Location of configuration file
+cfg=/etc/gp-reviews-tgrm-bot.cfg
+
+#Pid file to track start/stop of process
+pidfile=/var/run/gp-reviews-tgrm-bot.pid
+logfile=/var/log/gp-reviews-tgrm-bot/gp-reviews-tgrm-bot.log
+
+
+#Run as user
+runasuser=nobody
+runasgroup=nobody
+
+#END CONFIG SECTION
+#####################
+
+start() {
+    echo "Starting gp-reviews-tgrm-bot"
+    twistd --logfile $logfile --pidfile $pidfile --gid=$runasgroup --uid=$runasuser gp-reviews-tgrm-bot -c $cfg && echo "gp-reviews-tgrm-bot started" && exit 0
+    echo "Failed to start gp-reviews-tgrm-bot"
+    exit 1
+}
+
+stop() {
+    echo "Stopping gp-reviews-tgrm-bot"
+    killproc -p $pidfile "$prog"
+    exit $?
+}
+
+case "$1" in
+    start)
+    start
+    ;;
+    stop)
+    stop
+    ;;
+    *)
+    echo "Usage: gp-reviews-tgrm-bot {start|stop}"
+esac
+
+exit 1

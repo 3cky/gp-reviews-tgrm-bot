@@ -1,0 +1,9 @@
+protobuf>=2.5.0
+twisted
+-e git://github.com/3cky/pyTelegramBotAPI.git#egg=TelegramBotAPI
+-e git://github.com/3cky/txTelegramBot.git#egg=txTelegramBot
+treq
+jinja2
+jinja2_pluralize
+babel
+humanfriendly

@@ -1,0 +1,43 @@
+2017-02-15T13:53:40+0300 [-] Unexpected error while writing cache file
+	Traceback (most recent call last):
+	  File "/home/avm/projects/venv/gp-reviews-tgrm-bot/lib/python3.5/site-packages/twisted/application/app.py", line 610, in parseOptions
+	    usage.Options.parseOptions(self, options)
+	  File "/home/avm/projects/venv/gp-reviews-tgrm-bot/lib/python3.5/site-packages/twisted/python/usage.py", line 262, in parseOptions
+	    for (cmd, short, parser, doc) in self.subCommands:
+	  File "/home/avm/projects/venv/gp-reviews-tgrm-bot/lib/python3.5/site-packages/twisted/application/app.py", line 627, in subCommands
+	    for plug in sorted(plugins, key=attrgetter('tapname')):
+	  File "/home/avm/projects/venv/gp-reviews-tgrm-bot/lib/python3.5/site-packages/twisted/plugin.py", line 213, in getPlugins
+	    allDropins = getCache(package)
+	--- <exception caught here> ---
+	  File "/home/avm/projects/venv/gp-reviews-tgrm-bot/lib/python3.5/site-packages/twisted/plugin.py", line 185, in getCache
+	    dropinPath.setContent(pickle.dumps(dropinDotCache))
+	builtins.AttributeError: 'ZipPath' object has no attribute 'setContent'
+	
+2017-02-15T13:53:40+0300 [twisted.scripts._twistd_unix.UnixAppLogger#info] twistd 16.6.0 (/home/avm/projects/venv/gp-reviews-tgrm-bot/bin/python 3.5.2) starting up.
+2017-02-15T13:53:40+0300 [twisted.scripts._twistd_unix.UnixAppLogger#info] reactor class: twisted.internet.epollreactor.EPollReactor.
+2017-02-15T13:53:40+0300 [-] [<class 'notifiers.Ping'>]
+2017-02-15T13:53:43+0300 [-] Authorizing Google Play session...
+2017-02-15T13:53:43+0300 [twisted.web.client._HTTP11ClientFactory#info] Starting factory <twisted.web.client._HTTP11ClientFactory object at 0x7fc96c06c208>
+2017-02-15T13:53:44+0300 [HTTP11ClientProtocol (TLSMemoryBIOProtocol),client] Can't authorize Google Play session
+	Traceback (most recent call last):
+	  File "/home/avm/projects/venv/gp-reviews-tgrm-bot/lib/python3.5/site-packages/twisted/internet/defer.py", line 1355, in gotResult
+	    _inlineCallbacks(r, g, deferred)
+	  File "/home/avm/projects/venv/gp-reviews-tgrm-bot/lib/python3.5/site-packages/twisted/internet/defer.py", line 1297, in _inlineCallbacks
+	    result = result.throwExceptionIntoGenerator(g)
+	  File "/home/avm/projects/venv/gp-reviews-tgrm-bot/lib/python3.5/site-packages/twisted/python/failure.py", line 389, in throwExceptionIntoGenerator
+	    return g.throw(self.type, self.value, self.tb)
+	  File "/home/avm/projects/venv/gp-reviews-tgrm-bot/lib/python3.5/site-packages/gp_reviews_tgrm_bot-0.1.0-py3.5.egg/twisted/plugins/bot_plugin.py", line 188, in run
+	    
+	--- <exception caught here> ---
+	  File "/home/avm/projects/venv/gp-reviews-tgrm-bot/lib/python3.5/site-packages/gp_reviews_tgrm_bot-0.1.0-py3.5.egg/twisted/plugins/bot_plugin.py", line 186, in run
+	    
+	  File "/home/avm/projects/venv/gp-reviews-tgrm-bot/lib/python3.5/site-packages/twisted/internet/defer.py", line 1299, in _inlineCallbacks
+	    result = g.send(result)
+	  File "/home/avm/projects/venv/gp-reviews-tgrm-bot/lib/python3.5/site-packages/gp_reviews_tgrm_bot-0.1.0-py3.5.egg/reviewnotify/googleplay/market.py", line 81, in login
+	    
+	builtins.TypeError: a bytes-like object is required, not 'str'
+	
+2017-02-15T13:53:59+0300 [-] Received SIGTERM, shutting down.
+2017-02-15T13:53:59+0300 [twisted.web.client._HTTP11ClientFactory#info] Stopping factory <twisted.web.client._HTTP11ClientFactory object at 0x7fc96c06c208>
+2017-02-15T13:54:03+0300 [-] Main loop terminated.
+2017-02-15T13:54:03+0300 [twisted.scripts._twistd_unix.UnixAppLogger#info] Server Shut Down.
