@@ -5,7 +5,7 @@ Created on 20-Jan-2017
 @author: 3cky
 '''
 
-from twisted.python import log
+from twisted.python import log, failure
 from twisted.web import http
 from twisted.internet import defer
 from twisted.application import service
@@ -46,7 +46,7 @@ class Bot(service.Service, MessagePlugin):
 
         log.msg("on_update: msg: %s" % msg)
         if msg is not None and hasattr(msg, 'text'):
-            cmd_args = msg.text.split(maxsplit=1)
+            cmd_args = msg.text.split(' ', 1)
             if len(cmd_args) == 2:
                 cmd, args = cmd_args
                 args = args.strip()
@@ -79,7 +79,8 @@ class Bot(service.Service, MessagePlugin):
                 resp = _(u'Unknown command: %(cmd)s\n' +
                          u'Please use /help for list of available commands.') % {'cmd': cmd}
         except Exception as e:
-            log.err(e, 'Error while handling command \'%s %s\':' % (cmd, args,))
+            f = failure.Failure()
+            log.err(f, 'Error while handling command \'%s %s\': %s' % (cmd, args if args else '', e,))
             resp = 'ERROR: [%s] (see log file for details)' % str(e)
         defer.returnValue(resp)
 
@@ -110,7 +111,7 @@ class Bot(service.Service, MessagePlugin):
             msg = yield self._cmd_watch_list(chat_id)
             defer.returnValue(msg)
 
-        watch_args = cmd_args.split(maxsplit=1)
+        watch_args = cmd_args.split(' ', 1)
         watch_args = [w.strip() for w in watch_args]
 
         if len(watch_args) == 1:
@@ -166,7 +167,7 @@ class Bot(service.Service, MessagePlugin):
             for app in apps:
                 _app_id, app_name, app_desc = app
                 app_url = gp_app_url(app_name)
-                msg += '\n[%(app_desc)s](%(app_url)s)' % {'app_desc': app_desc, 'app_url': app_url}
+                msg += u'\n[%s](%s)' % (app_desc, app_url,)
         else:
             msg = _(u'No watched apps.')
         defer.returnValue(msg)

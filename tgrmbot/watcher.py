@@ -168,12 +168,12 @@ class GpReviewsWatcher(service.Service):
     def unwatch(self, chat_id, app_name):
         app = yield self.db.get_app(app_name)
         if not app:
-            return None
+            defer.returnValue(None)
 
         app_id, app_name, app_desc = app[0]
         watcher = yield self.db.get_watcher(app_id, chat_id)
         if not watcher:
-            return None
+            defer.returnValue(None)
 
         # delete watcher first
         watcher_id, _app_id, _chat_id = watcher[0]
@@ -185,7 +185,7 @@ class GpReviewsWatcher(service.Service):
             yield self.db.delete_reviews(app_id)
             yield self.db.delete_app(app_id)
 
-        return (app_name, app_desc)
+        defer.returnValue((app_name, app_desc))
 
 
     @defer.inlineCallbacks

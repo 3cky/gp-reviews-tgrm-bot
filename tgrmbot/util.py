@@ -12,9 +12,9 @@ import re
 
 import babel.dates
 
-GP_APP_URL = 'https://play.google.com/store/apps/details?id={app_name}&hl={lang}'
+GP_APP_URL = u'https://play.google.com/store/apps/details?id={app_name}&hl={lang}'
 
-GP_REVIEW_URL = 'https://play.google.com/apps/publish/?dev_acc={dev_id}#ReviewDetailsPlace:p={app_id}&reviewid={review_id}'
+GP_REVIEW_URL = u'https://play.google.com/apps/publish/?dev_acc={dev_id}#ReviewDetailsPlace:p={app_id}&reviewid={review_id}'
 
 GP_APP_ID_REGEX = r'id=([a-zA_Z_][.\w]*)'
 GP_APP_DESC_REGEX = r'<title id="main-title">(.+) - Android Apps on Google Play</title>'

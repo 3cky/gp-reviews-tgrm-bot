@@ -22,7 +22,10 @@ class LocalizationSupport(object):
         self.translations = babel.support.Translations.load(dirname=locale_dir,
                                                             locales=[self.locale])
         t = translation('messages', localedir=locale_dir, languages=[self.locale])
-        t.install()
+        try:
+            t.install(unicode=True) # Python 2
+        except:
+            t.install() # Python 3
 
 
     def get_locales(self):

@@ -1,3 +1,5 @@
+six
+configparser
 protobuf>=2.5.0
 twisted
 -e git://github.com/3cky/pyTelegramBotAPI.git#egg=TelegramBotAPI
