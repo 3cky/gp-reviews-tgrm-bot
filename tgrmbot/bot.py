@@ -65,16 +65,35 @@ class Bot(service.Service, MessagePlugin):
     @defer.inlineCallbacks
     def _handle_cmd(self, chat_id, cmd, args):
         try:
-            if cmd == '/watch':
+            if cmd == '/start':
+                resp = self._cmd_start()
+            elif cmd == '/help':
+                resp = self._cmd_help()
+            elif cmd == '/watch':
                 resp = yield self._cmd_watch(chat_id, args)
-            if cmd == '/unwatch':
+            elif cmd == '/unwatch':
                 resp = yield self._cmd_unwatch(chat_id, args)
             elif cmd == '/echo':
                 resp = self._cmd_echo(chat_id, args)
+            else:
+                resp = _(u'Unknown command: %(cmd)s\n' +
+                         u'Please use /help for list of available commands.') % {'cmd': cmd}
         except Exception as e:
             log.err(e, 'Error while handling command \'%s %s\':' % (cmd, args,))
             resp = 'ERROR: [%s] (see log file for details)' % str(e)
         defer.returnValue(resp)
+
+
+    def _cmd_start(self):
+        return _(u'Hello, I\'m *Google Play app reviews watching bot*.\nFor help, please use /help command.')
+
+
+    def _cmd_help(self):
+        return _(u'*Available commands:*\n\n' +
+                 u'/watch `[app_id_or_url [app_description]]`\nStart watching for reviews for an application. ' +
+                 u'Command without arguments shows the list of watched applications. ' +
+                 u'Example:\n/watch `https://play.google.com/store/apps/details?id=com.android.chrome Chrome`\n\n' +
+                 u'/unwatch `<app_id_or_url>`\nStop watching for reviews for an application.')
 
 
     def _cmd_echo(self, chat_id, cmd_args):

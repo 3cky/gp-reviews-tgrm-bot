@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-27 16:36+0300\n"
+"POT-Creation-Date: 2017-02-27 17:16+0300\n"
 "PO-Revision-Date: 2015-07-16 12:30+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru_RU\n"
@@ -16,49 +16,90 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-#: tgrmbot/bot.py:107
+#: tgrmbot/bot.py:79
+#, python-format
+msgid ""
+"Unknown command: %(cmd)s\n"
+"Please use /help for list of available commands."
+msgstr ""
+"Неизвестная команда: %(cmd)s\n"
+"Используйте /help для получения списка доступных команд."
+
+#: tgrmbot/bot.py:88
+msgid ""
+"Hello, I'm *Google Play app reviews watching bot*.\n"
+"For help, please use /help command."
+msgstr ""
+"Привет, я *бот отслеживания отзывов о приложениях Google Play*.\n"
+"Используйте /help для получения списка доступных команд."
+
+#: tgrmbot/bot.py:92
+msgid ""
+"*Available commands:*\n"
+"\n"
+"/watch `[app_id_or_url [app_description]]`\n"
+"Start watching for reviews for an application. Command without arguments"
+" shows the list of watched applications. Example:\n"
+"/watch `https://play.google.com/store/apps/details?id=com.android.chrome "
+"Chrome`\n"
+"\n"
+"/unwatch `<app_id_or_url>`\n"
+"Stop watching for reviews for an application."
+msgstr ""
+"*Доступные команды:*\n"
+"\n"
+"/watch `[app_id_or_url [app_description]]`\n"
+"Начать следить за отзывами о приложении. Команда без параметров"
+" выведет список отслеживаемых приложений. Пример:\n"
+"/watch `https://play.google.com/store/apps/details?id=com.android.chrome "
+"Chrome`\n"
+"\n"
+"/unwatch `<app_id_or_url>`\n"
+"Прекратить следить за отзывами о приложении."
+
+#: tgrmbot/bot.py:126
 #, python-format
 msgid "Invalid app: `%(app_str)s`"
 msgstr "Неправильное приложение: `%(app_str)s`"
 
-#: tgrmbot/bot.py:114
+#: tgrmbot/bot.py:133
 #, python-format
 msgid "App not found: %(app_url)s"
 msgstr "Приложение не найдено: %(app_url)s"
 
-#: tgrmbot/bot.py:125
+#: tgrmbot/bot.py:144
 #, python-format
 msgid "Already watching: [%(app_desc)s](%(app_url)s)"
 msgstr "Уже отслеживается: [%(app_desc)s](%(app_url)s)"
 
-#: tgrmbot/bot.py:128
+#: tgrmbot/bot.py:147
 #, python-format
 msgid "Added for watching: [%(app_desc)s](%(app_url)s)"
 msgstr "Добавлено в отслеживаемые: [%(app_desc)s](%(app_url)s)"
 
-#: tgrmbot/bot.py:143
+#: tgrmbot/bot.py:162
 msgid "Watched apps:"
 msgstr "Отслеживаемые приложения:"
 
-#: tgrmbot/bot.py:149
+#: tgrmbot/bot.py:168
 msgid "No watched apps."
 msgstr "Нет отслеживаемых приложений."
 
-#: tgrmbot/bot.py:160
+#: tgrmbot/bot.py:179
 msgid "Please specify app to remove from watched."
 msgstr "Укажите приложение для удаления из отслеживаемых."
 
-#: tgrmbot/bot.py:164
+#: tgrmbot/bot.py:183
 #, python-format
 msgid "Invalid app to unwatch: `%(app_str)s`"
 msgstr "Неправильное приложение: `%(app_str)s`"
 
-#: tgrmbot/bot.py:168
+#: tgrmbot/bot.py:187
 #, python-format
 msgid "App not watched: `%(app_name)s`"
 msgstr "Приложение не отслеживается: `%(app_name)s`"
 
-#: tgrmbot/bot.py:172
+#: tgrmbot/bot.py:191
 #, python-format
 msgid "Removed from watched: [%(app_desc)s](%(app_url)s)"
 msgstr "Удалено из отслеживаемых: [%(app_desc)s](%(app_url)s)"
