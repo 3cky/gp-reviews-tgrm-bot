@@ -23,18 +23,15 @@ class DataStorage(object):
     def _create_tables(self):
         # create apps table
         yield self._dbpool.runQuery('CREATE TABLE IF NOT EXISTS apps \
-            (id INTEGER PRIMARY KEY, name TEXT UNIQUE, desc TEXT)')
+            (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, desc TEXT)')
         # create reviews table
         yield self._dbpool.runQuery('CREATE TABLE IF NOT EXISTS reviews \
-            (id INTEGER PRIMARY KEY, app_id INTEGER, author_id TEXT, author_name TEXT, \
+            (id INTEGER PRIMARY KEY AUTOINCREMENT, app_id INTEGER, author_id TEXT, author_name TEXT, \
             timestamp INTEGER, rating INTEGER, comment TEXT, lang TEXT)')
         yield self._dbpool.runQuery('CREATE INDEX IF NOT EXISTS reviews_app_id_idx ON reviews (app_id)')
         # create watchers table
         yield self._dbpool.runQuery('CREATE TABLE IF NOT EXISTS watchers \
-            (id INTEGER PRIMARY KEY, app_id INTEGER, chat_id TEXT)')
-        # create chat settings table
-        yield self._dbpool.runQuery('CREATE TABLE IF NOT EXISTS chat_settings \
-            (chat_id TEXT UNIQUE, locale TEXT)')
+            (id INTEGER PRIMARY KEY AUTOINCREMENT, app_id INTEGER, chat_id TEXT)')
 
 
     def get_apps(self):
@@ -137,27 +134,3 @@ class DataStorage(object):
         '''
         return self._dbpool.runQuery('SELECT app.id, app.name, app.desc ' +
             'FROM apps app INNER JOIN watchers w ON app.id = w.app_id WHERE w.chat_id = ?', (chat_id,))
-
-
-    def get_chat_settings(self, chat_id):
-        '''
-        Get chat settings (locale, etc).
-        '''
-        return self._dbpool.runQuery('SELECT * FROM chat_settings WHERE chat_id = ?', (chat_id,))
-
-
-    def add_chat_settings(self, chat_id, chat_locale):
-        '''
-        Add chat settings.
-        '''
-        return self._dbpool.runQuery('INSERT INTO chat_settings (chat_id, locale) VALUES (?, ?)',
-                                     (chat_id, chat_locale,))
-
-
-    def update_chat_settings(self, chat_id, chat_locale):
-        '''
-        Update chat settings.
-        '''
-        return self._dbpool.runQuery('UPDATE chat_settings SET locale = ? WHERE chat_id = ?',
-                                     (chat_locale, chat_id,))
-
