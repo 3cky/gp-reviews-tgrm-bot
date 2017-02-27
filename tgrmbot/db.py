@@ -28,6 +28,7 @@ class DataStorage(object):
         yield self._dbpool.runQuery('CREATE TABLE IF NOT EXISTS reviews \
             (id INTEGER PRIMARY KEY, app_id INTEGER, author_id TEXT, author_name TEXT, \
             timestamp INTEGER, rating INTEGER, comment TEXT, lang TEXT)')
+        yield self._dbpool.runQuery('CREATE INDEX IF NOT EXISTS reviews_app_id_idx ON reviews (app_id)')
         # create watchers table
         yield self._dbpool.runQuery('CREATE TABLE IF NOT EXISTS watchers \
             (id INTEGER PRIMARY KEY, app_id INTEGER, chat_id TEXT)')
