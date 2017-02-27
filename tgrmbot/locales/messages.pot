@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-27 13:59+0300\n"
+"POT-Creation-Date: 2017-02-27 16:36+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,36 +17,51 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-#: tgrmbot/bot.py:86
-msgid "Ok."
-msgstr ""
-
-#: tgrmbot/bot.py:116
+#: tgrmbot/bot.py:107
 #, python-format
-msgid "Invalid app: %(app)s"
+msgid "Invalid app: `%(app_str)s`"
 msgstr ""
 
-#: tgrmbot/bot.py:123
+#: tgrmbot/bot.py:114
 #, python-format
 msgid "App not found: %(app_url)s"
 msgstr ""
 
-#: tgrmbot/bot.py:134
+#: tgrmbot/bot.py:125
 #, python-format
 msgid "Already watching: [%(app_desc)s](%(app_url)s)"
 msgstr ""
 
-#: tgrmbot/bot.py:137
+#: tgrmbot/bot.py:128
 #, python-format
 msgid "Added for watching: [%(app_desc)s](%(app_url)s)"
 msgstr ""
 
-#: tgrmbot/bot.py:145
+#: tgrmbot/bot.py:143
 msgid "Watched apps:"
 msgstr ""
 
-#: tgrmbot/bot.py:151
+#: tgrmbot/bot.py:149
 msgid "No watched apps."
+msgstr ""
+
+#: tgrmbot/bot.py:160
+msgid "Please specify app to remove from watched."
+msgstr ""
+
+#: tgrmbot/bot.py:164
+#, python-format
+msgid "Invalid app to unwatch: `%(app_str)s`"
+msgstr ""
+
+#: tgrmbot/bot.py:168
+#, python-format
+msgid "App not watched: `%(app_name)s`"
+msgstr ""
+
+#: tgrmbot/bot.py:172
+#, python-format
+msgid "Removed from watched: [%(app_desc)s](%(app_url)s)"
 msgstr ""
 
 #: tgrmbot/templates/review.md:8

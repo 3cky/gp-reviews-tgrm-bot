@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-27 13:59+0300\n"
+"POT-Creation-Date: 2017-02-27 16:36+0300\n"
 "PO-Revision-Date: 2015-07-16 12:30+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru_RU\n"
@@ -16,38 +16,54 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-#: tgrmbot/bot.py:86
-msgid "Ok."
-msgstr "Готово."
-
-#: tgrmbot/bot.py:116
+#: tgrmbot/bot.py:107
 #, python-format
-msgid "Invalid app: %(app)s"
-msgstr "Неправильное приложение: %(app)s"
+msgid "Invalid app: `%(app_str)s`"
+msgstr "Неправильное приложение: `%(app_str)s`"
 
-#: tgrmbot/bot.py:123
+#: tgrmbot/bot.py:114
 #, python-format
 msgid "App not found: %(app_url)s"
 msgstr "Приложение не найдено: %(app_url)s"
 
-#: tgrmbot/bot.py:134
+#: tgrmbot/bot.py:125
 #, python-format
 msgid "Already watching: [%(app_desc)s](%(app_url)s)"
 msgstr "Уже отслеживается: [%(app_desc)s](%(app_url)s)"
 
-#: tgrmbot/bot.py:137
+#: tgrmbot/bot.py:128
 #, python-format
 msgid "Added for watching: [%(app_desc)s](%(app_url)s)"
 msgstr "Добавлено в отслеживаемые: [%(app_desc)s](%(app_url)s)"
 
-#: tgrmbot/bot.py:145
+#: tgrmbot/bot.py:143
 msgid "Watched apps:"
 msgstr "Отслеживаемые приложения:"
 
-#: tgrmbot/bot.py:151
+#: tgrmbot/bot.py:149
 msgid "No watched apps."
 msgstr "Нет отслеживаемых приложений."
+
+#: tgrmbot/bot.py:160
+msgid "Please specify app to remove from watched."
+msgstr "Укажите приложение для удаления из отслеживаемых."
+
+#: tgrmbot/bot.py:164
+#, python-format
+msgid "Invalid app to unwatch: `%(app_str)s`"
+msgstr "Неправильное приложение: `%(app_str)s`"
+
+#: tgrmbot/bot.py:168
+#, python-format
+msgid "App not watched: `%(app_name)s`"
+msgstr "Приложение не отслеживается: `%(app_name)s`"
+
+#: tgrmbot/bot.py:172
+#, python-format
+msgid "Removed from watched: [%(app_desc)s](%(app_url)s)"
+msgstr "Удалено из отслеживаемых: [%(app_desc)s](%(app_url)s)"
 
 #: tgrmbot/templates/review.md:8
 msgid "Changed from:"
 msgstr "Предыдущий комментарий:"
+

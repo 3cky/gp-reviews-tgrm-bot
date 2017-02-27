@@ -108,7 +108,6 @@ class GpReviewsWatcher(service.Service):
                             yield sleep(self.poll_delay)
                     # notify about new gp_reviews all related chats
                     if reviews:
-                        reviews = reviews[:3]
                         # sort gp_reviews by creation time before notification
                         reviews.sort(key = lambda k: k.get('timestamp'))
                         # notify all related chats
@@ -161,6 +160,30 @@ class GpReviewsWatcher(service.Service):
         # force next poll cycle
         self.poll()
         defer.returnValue(True)
+
+
+    @defer.inlineCallbacks
+    def unwatch(self, chat_id, app_name):
+        app = yield self.db.get_app(app_name)
+        if not app:
+            return None
+
+        app_id, app_name, app_desc = app[0]
+        watcher = yield self.db.get_watcher(app_id, chat_id)
+        if not watcher:
+            return None
+
+        # delete watcher first
+        watcher_id, _app_id, _chat_id = watcher[0]
+        yield self.db.delete_watcher(watcher_id)
+
+        # if no more watchers are watching given app, delete it and its reviews
+        app_watchers = yield self.db.get_watchers(app_id)
+        if not app_watchers:
+            yield self.db.delete_reviews(app_id)
+            yield self.db.delete_app(app_id)
+
+        return (app_name, app_desc)
 
 
     @defer.inlineCallbacks

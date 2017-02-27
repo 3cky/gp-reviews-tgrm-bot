@@ -67,8 +67,8 @@ class Bot(service.Service, MessagePlugin):
         try:
             if cmd == '/watch':
                 resp = yield self._cmd_watch(chat_id, args)
-            elif cmd == '/poll':
-                resp = self._cmd_poll()
+            if cmd == '/unwatch':
+                resp = yield self._cmd_unwatch(chat_id, args)
             elif cmd == '/echo':
                 resp = self._cmd_echo(chat_id, args)
         except Exception as e:
@@ -79,11 +79,6 @@ class Bot(service.Service, MessagePlugin):
 
     def _cmd_echo(self, chat_id, cmd_args):
         return cmd_args
-
-
-    def _cmd_poll(self):
-        self._gp_watcher.poll()
-        return _(u'Ok.')
 
 
     @defer.inlineCallbacks
@@ -106,14 +101,10 @@ class Bot(service.Service, MessagePlugin):
         else:
             app_str, app_desc = watch_args
 
-        if app_str.startswith('http'):
-            # extract app symbolic name from its gp page url
-            app_name = gp_app_name(app_str)
-        else:
-            app_name = app_str
+        app_name = self._to_app_name(app_str)
 
         if app_name is None or not app_name:
-            defer.returnValue(_(u'Invalid app: %(app)s') % {'app': app_str})
+            defer.returnValue(_(u'Invalid app: `%(app_str)s`') % {'app_str': app_str})
 
         # reconstruct app gp page url from its symbolic name
         app_url = gp_app_url(app_name, 'en')
@@ -138,6 +129,13 @@ class Bot(service.Service, MessagePlugin):
                                 {'app_desc': app_desc, 'app_url': app_url})
 
 
+    def _to_app_name(self, app_str):
+        if app_str.startswith('http'):
+            # extract app symbolic name from its gp page url
+            return gp_app_name(app_str)
+        return app_str
+
+
     @defer.inlineCallbacks
     def _cmd_watch_list(self, chat_id):
         apps = yield self._gp_watcher.watched_apps(chat_id)
@@ -150,6 +148,29 @@ class Bot(service.Service, MessagePlugin):
         else:
             msg = _(u'No watched apps.')
         defer.returnValue(msg)
+
+
+    @defer.inlineCallbacks
+    def _cmd_unwatch(self, chat_id, app_str):
+        '''
+        Format: /unwatch <app_id_or_url>
+
+        '''
+        if app_str is None or not app_str:
+            defer.returnValue(_(u'Please specify app to remove from watched.'))
+
+        app_name = self._to_app_name(app_str)
+        if app_name is None or not app_name:
+            defer.returnValue(_(u'Invalid app to unwatch: `%(app_str)s`') % {'app_str': app_str})
+
+        app = yield self._gp_watcher.unwatch(chat_id, app_name)
+        if not app:
+            defer.returnValue(_(u'App not watched: `%(app_name)s`') % {'app_name': app_name})
+
+        _app_name, app_desc = app
+        app_url = gp_app_url(app_name)
+        defer.returnValue(_(u'Removed from watched: [%(app_desc)s](%(app_url)s)') %
+                                {'app_desc': app_desc, 'app_url': app_url})
 
 
     @defer.inlineCallbacks

@@ -85,6 +85,13 @@ class DataStorage(object):
                     (app_id, author_id, author_name, timestamp, rating, comment, lang,))
 
 
+    def delete_reviews(self, app_id):
+        '''
+        Delete all reviews for an application with given id.
+        '''
+        return self._dbpool.runQuery('DELETE FROM reviews WHERE app_id = ?', (app_id,))
+
+
     def update_review(self, review_id, rating, comment):
         '''
         Update an application review data.
