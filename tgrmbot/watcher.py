@@ -85,7 +85,8 @@ class GpReviewsWatcher(service.Service):
                                                 'device': gp_review.get('deviceName'),
                                                 'rating': review_rating,
                                                 'title': gp_review.get('title'),
-                                                'comment': review_comment})
+                                                'comment': review_comment,
+                                                'lang': gp_lang})
                             else:
                                 # review with given author ID already seen, check for changes
                                 review_id, _app_id, _author_id, _author_name, _timestamp, \
@@ -102,7 +103,8 @@ class GpReviewsWatcher(service.Service):
                                                     'title': gp_review.get('title'),
                                                     'comment': review_comment,
                                                     'old_rating': old_review_rating,
-                                                    'old_comment': old_review_comment})
+                                                    'old_comment': old_review_comment,
+                                                    'lang': gp_lang})
                         if gp_lang != self.gp_langs[-1]:
                             # delay before check next gp_lang
                             yield sleep(self.poll_delay)
@@ -116,7 +118,7 @@ class GpReviewsWatcher(service.Service):
                             chat_ids = [chat_id for _watcher_id, _app_id, chat_id in watchers]
                             messages = [self.templateRenderer.render(REVIEW_TEMPLATE_NAME,
                                                                      app={'name': app_name, 'desc': app_desc},
-                                                                     review=review, gp_lang=gp_lang)
+                                                                     review=review)
                                         for review in reviews]
                             for chat_id in chat_ids:
                                 yield self._bot.send_messages(chat_id, messages)
