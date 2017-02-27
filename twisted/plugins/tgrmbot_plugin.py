@@ -88,8 +88,6 @@ class ServiceManager(object):
                                      'in configuration file [account] section')
         googleLogin = cfg.get('google', 'login')
         googlePassword = cfg.get('google', 'password')
-        googleDeveloperId = cfg.get('google', 'developer_id') \
-            if cfg.has_option('google', 'developer_id') else None
         # get ANDROID_ID from configuration
         if not cfg.has_option('google', 'android_id'):
             raise ConfigurationError('ANDROID_ID must be specified in configuration file [account] section')
