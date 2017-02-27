@@ -1,5 +1,5 @@
 {{ review.timestamp|datetime }}
-[{{ app.desc }}]({{ app.name|app_url(gp_lang) }}){% if review.version %} (`{{ review.version }}`){% endif %}{% if review.device %} /{{ review.device }}/{% endif %}
+[{{ app.desc }}]({{ app.name|app_url(gp_lang) }}){% if review.version %} (`{{ review.version }}`){% endif %}{% if review.device %} _{{ review.device }}_{% endif %}
 {% for rating in range(0, 5) %}{% if review.rating > rating %}★{% else %}☆{% endif %}{% endfor %}
 {% if review.title %}*{{ review.title }}*{{ "\n" }}{% endif -%}
 ```
