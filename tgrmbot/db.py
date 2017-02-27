@@ -23,7 +23,7 @@ class DataStorage(object):
     def _create_tables(self):
         # create apps table
         yield self._dbpool.runQuery('CREATE TABLE IF NOT EXISTS apps \
-            (id INTEGER PRIMARY KEY, app_name TEXT UNIQUE, app_desc TEXT)')
+            (id INTEGER PRIMARY KEY, name TEXT UNIQUE, desc TEXT)')
         # create reviews table
         yield self._dbpool.runQuery('CREATE TABLE IF NOT EXISTS reviews \
             (id INTEGER PRIMARY KEY, app_id INTEGER, author_id TEXT, author_name TEXT, \
@@ -38,7 +38,7 @@ class DataStorage(object):
 
     def get_apps(self):
         '''
-        Get watched apps as deferred of list of tuples (id, name).
+        Get watched apps as deferred of list of tuples (id, app_name, app_desc).
         '''
         return self._dbpool.runQuery('SELECT * FROM apps')
 
@@ -47,7 +47,7 @@ class DataStorage(object):
         '''
         Get watched app with given name as deferred of list of tuples (id, name).
         '''
-        return self._dbpool.runQuery('SELECT * FROM apps WHERE app_name = ?', (app_name,))
+        return self._dbpool.runQuery('SELECT * FROM apps WHERE name = ?', (app_name,))
 
 
     def add_app(self, app_name, app_desc):
@@ -57,7 +57,7 @@ class DataStorage(object):
         return self._dbpool.runInteraction(self._txn_add_app, app_name, app_desc)
 
     def _txn_add_app(self, txn, app_name, app_desc):
-        txn.execute('INSERT INTO apps (app_name, app_desc) VALUES (?, ?)', (app_name, app_desc,))
+        txn.execute('INSERT INTO apps (name, desc) VALUES (?, ?)', (app_name, app_desc,))
         return txn.lastrowid
 
 
@@ -121,6 +121,14 @@ class DataStorage(object):
         Get watchers for an application.
         '''
         return self._dbpool.runQuery('SELECT * FROM watchers WHERE app_id = ?', (app_id,))
+
+
+    def get_watched_apps(self, chat_id):
+        '''
+        Get watched apps for chat as deferred of list of tuples (id, app_name, app_desc).
+        '''
+        return self._dbpool.runQuery('SELECT app.id, app.name, app.desc ' +
+            'FROM apps app INNER JOIN watchers w ON app.id = w.app_id WHERE w.chat_id = ?', (chat_id,))
 
 
     def get_chat_settings(self, chat_id):

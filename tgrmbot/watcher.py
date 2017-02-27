@@ -56,7 +56,7 @@ class GpReviewsWatcher(service.Service):
                     yield sleep(RELOGIN_TIMEOUT)
                     continue
             yield sleep(0) # switch to main thread
-            log.msg('Checking for new gp_reviews...')
+            log.msg('Checking for new reviews...')
             apps = yield self.db.get_apps()
             for app in apps:
                 app_id, app_name, app_desc = app
@@ -161,6 +161,12 @@ class GpReviewsWatcher(service.Service):
         # force next poll cycle
         self.poll()
         defer.returnValue(True)
+
+
+    @defer.inlineCallbacks
+    def watched_apps(self, chat_id):
+        apps = yield self.db.get_watched_apps(chat_id)
+        defer.returnValue(apps)
 
 
     def poll(self):

@@ -89,11 +89,12 @@ class Bot(service.Service, MessagePlugin):
     @defer.inlineCallbacks
     def _cmd_watch(self, chat_id, cmd_args):
         '''
-        Format: /watch <app_id_or_url> [app_desc]
+        Format: /watch [app_id_or_url [app_desc]]
 
         '''
         if cmd_args is None or not cmd_args:
-            defer.returnValue(_(u'Please specify app to watch.'))
+            msg = yield self._cmd_watch_list(chat_id)
+            defer.returnValue(msg)
 
         watch_args = cmd_args.split(maxsplit=1)
         watch_args = [w.strip() for w in watch_args]
@@ -115,7 +116,7 @@ class Bot(service.Service, MessagePlugin):
             defer.returnValue(_(u'Invalid app: %(app)s') % {'app': app_str})
 
         # reconstruct app gp page url from its symbolic name
-        app_url = gp_app_url(app_name)
+        app_url = gp_app_url(app_name, 'en')
 
         app_data = yield self._fetch_app_data(app_url)
         if app_data is None:
@@ -135,6 +136,20 @@ class Bot(service.Service, MessagePlugin):
 
         defer.returnValue(_(u'Added for watching: [%(app_desc)s](%(app_url)s)') %
                                 {'app_desc': app_desc, 'app_url': app_url})
+
+
+    @defer.inlineCallbacks
+    def _cmd_watch_list(self, chat_id):
+        apps = yield self._gp_watcher.watched_apps(chat_id)
+        if apps:
+            msg = _(u'Watched apps:')
+            for app in apps:
+                _app_id, app_name, app_desc = app
+                app_url = gp_app_url(app_name)
+                msg += '\n[%(app_desc)s](%(app_url)s)' % {'app_desc': app_desc, 'app_url': app_url}
+        else:
+            msg = _(u'No watched apps.')
+        defer.returnValue(msg)
 
 
     @defer.inlineCallbacks

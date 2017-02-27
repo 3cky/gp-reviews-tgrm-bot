@@ -52,7 +52,7 @@ def gp_app_desc(app_data):
     return m.group(1) if m else None
 
 
-def gp_app_url(app_name, lang='en'):
+def gp_app_url(app_name, lang=''):
     '''
     Get Google Play application page URL
     '''

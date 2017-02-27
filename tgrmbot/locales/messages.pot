@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-27 12:22+0300\n"
+"POT-Creation-Date: 2017-02-27 13:59+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,28 +21,32 @@ msgstr ""
 msgid "Ok."
 msgstr ""
 
-#: tgrmbot/bot.py:96
-msgid "Please specify app to watch."
-msgstr ""
-
-#: tgrmbot/bot.py:115
+#: tgrmbot/bot.py:116
 #, python-format
 msgid "Invalid app: %(app)s"
 msgstr ""
 
-#: tgrmbot/bot.py:122
+#: tgrmbot/bot.py:123
 #, python-format
 msgid "App not found: %(app_url)s"
 msgstr ""
 
-#: tgrmbot/bot.py:133
+#: tgrmbot/bot.py:134
 #, python-format
 msgid "Already watching: [%(app_desc)s](%(app_url)s)"
 msgstr ""
 
-#: tgrmbot/bot.py:136
+#: tgrmbot/bot.py:137
 #, python-format
 msgid "Added for watching: [%(app_desc)s](%(app_url)s)"
+msgstr ""
+
+#: tgrmbot/bot.py:145
+msgid "Watched apps:"
+msgstr ""
+
+#: tgrmbot/bot.py:151
+msgid "No watched apps."
 msgstr ""
 
 #: tgrmbot/templates/review.md:8
