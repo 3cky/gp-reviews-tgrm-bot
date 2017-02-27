@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-24 19:45+0300\n"
+"POT-Creation-Date: 2017-02-27 12:22+0300\n"
 "PO-Revision-Date: 2015-07-16 12:30+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru_RU\n"
@@ -22,7 +22,7 @@ msgstr "Готово."
 
 #: tgrmbot/bot.py:96
 msgid "Please specify app to watch."
-msgstr "Укажите приложение для отслеживания!"
+msgstr "Не указано приложение для отслеживания"
 
 #: tgrmbot/bot.py:115
 #, python-format
@@ -44,9 +44,9 @@ msgstr "Уже отслеживается: [%(app_desc)s](%(app_url)s)"
 msgid "Added for watching: [%(app_desc)s](%(app_url)s)"
 msgstr "Добавлено в отслеживаемые: [%(app_desc)s](%(app_url)s)"
 
-#: tgrmbot/templates/review_new.md:1
-msgid "Date"
-msgstr "Дата"
+#: tgrmbot/templates/review.md:8
+msgid "Changed from:"
+msgstr "Предыдущий комментарий:"
 
 #~ msgid "New"
 #~ msgstr ""
@@ -72,8 +72,11 @@ msgstr "Дата"
 #~ msgstr ""
 
 #~ msgid "Comment"
-#~ msgstr "Новая оценка"
+#~ msgstr ""
 
 #~ msgid "Link"
-#~ msgstr "Новые оценки"
+#~ msgstr "Новая оценка"
+
+#~ msgid "Date"
+#~ msgstr "Дата"
 
