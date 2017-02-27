@@ -132,6 +132,9 @@ class Bot(service.Service, MessagePlugin):
         if app_data is None:
             defer.returnValue(_(u'App not found: %(app_url)s') % {'app_url': app_url})
 
+        # get app page url without explicit language identifier
+        app_url = gp_app_url(app_name)
+
         if app_desc is None:
             # try to extract app description from app page
             app_desc = gp_app_desc(app_data)
