@@ -64,16 +64,19 @@ class Bot(service.Service, MessagePlugin):
 
     @defer.inlineCallbacks
     def _handle_cmd(self, chat_id, cmd, args):
+        # strip bot name from command
+        amp_index = cmd.find('@')
+        cmd_short = cmd if (amp_index < 0) else cmd[:amp_index]
         try:
-            if cmd == '/start':
+            if cmd_short == '/start':
                 resp = self._cmd_start()
-            elif cmd == '/help':
+            elif cmd_short == '/help':
                 resp = self._cmd_help()
-            elif cmd == '/watch':
+            elif cmd_short == '/watch':
                 resp = yield self._cmd_watch(chat_id, args)
-            elif cmd == '/unwatch':
+            elif cmd_short == '/unwatch':
                 resp = yield self._cmd_unwatch(chat_id, args)
-            elif cmd == '/echo':
+            elif cmd_short == '/echo':
                 resp = self._cmd_echo(chat_id, args)
             else:
                 resp = _(u'Unknown command: %(cmd)s\n' +
