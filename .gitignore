@@ -6,3 +6,4 @@
 /*.sqlite
 *.pyc
 MANIFEST
+/twistd.pid
