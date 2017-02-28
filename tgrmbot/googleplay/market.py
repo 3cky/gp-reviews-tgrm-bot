@@ -71,7 +71,8 @@ class MarketSession(object):
         params = {"Email": email, "Passwd": password, "service": self.SERVICE,
                   "accountType": accountType, "has_permission": "1",
                   "source": "android", "android_id": self.android_id,
-                  "app": "com.android.vending", "sdk_version": "16" }
+                  "app": "com.android.vending", "sdk_version": "17",
+                  "add_account": "1"}
         resp = yield treq.post(self.URL_LOGIN, params)
         if resp.code == http.OK:
             data = yield treq.content(resp)
