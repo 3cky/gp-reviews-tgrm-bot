@@ -32,7 +32,7 @@ import humanfriendly
 
 import logging
 logging.basicConfig()
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.INFO)
 
 TAP_NAME = "gp-reviews-tgrm-bot"
 
