@@ -9,7 +9,7 @@ It's written in Python using [Twisted](https://twistedmatrix.com/trac/) framewor
 
 Clone the repo in the directory of your choice using git:
 ```
-git clone https://github.com/3cky/gp-reviews-tgrm-bot-git
+git clone https://github.com/3cky/gp-reviews-tgrm-bot gp-reviews-tgrm-bot-git
 cd gp-reviews-tgrm-bot-git
 ```
 
