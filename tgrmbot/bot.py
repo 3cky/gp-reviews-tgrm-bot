@@ -19,7 +19,8 @@ from tgrmbot.util import sleep, gp_app_name, gp_app_desc, gp_app_url
 import treq
 import time
 
-MESSAGE_SEND_DELAY = 1.0 # message send delay in seconds
+MESSAGE_SEND_DELAY = 1.0  # message send delay in seconds
+
 
 class Bot(service.Service, MessagePlugin):
     '''
@@ -32,11 +33,9 @@ class Bot(service.Service, MessagePlugin):
         self.db = db
         self.l10n_support = l10n_support
 
-
     def startService(self):
         self._gp_watcher = self.parent.getServiceNamed('tgrmbot_gp_watcher')
         self._last_message_send = 0.
-
 
     @defer.inlineCallbacks
     def on_update(self, update):
@@ -45,7 +44,8 @@ class Bot(service.Service, MessagePlugin):
             msg = getattr(update, 'channel_post', None)
 
         log.msg("on_update: msg: %s" % msg)
-        if msg is not None and hasattr(msg, 'text'):
+        if msg is not None and hasattr(msg, 'text') and hasattr(msg, 'entities') and \
+                next((True for e in getattr(msg, 'entities') if e.type == 'bot_command'), False):
             cmd_args = msg.text.split(' ', 1)
             if len(cmd_args) == 2:
                 cmd, args = cmd_args
@@ -60,7 +60,6 @@ class Bot(service.Service, MessagePlugin):
                 yield self.send_message(msg.chat.id, resp)
 
         defer.returnValue(True)
-
 
     @defer.inlineCallbacks
     def _handle_cmd(self, chat_id, cmd, args):
@@ -87,10 +86,8 @@ class Bot(service.Service, MessagePlugin):
             resp = 'ERROR: [%s] (see log file for details)' % str(e)
         defer.returnValue(resp)
 
-
     def _cmd_start(self):
         return _(u'Hello, I\'m *Google Play app reviews watching bot*.\nFor help, please use /help command.')
-
 
     def _cmd_help(self):
         return _(u'*Available commands:*\n\n' +
@@ -99,10 +96,8 @@ class Bot(service.Service, MessagePlugin):
                  u'Example:\n/watch `https://play.google.com/store/apps/details?id=com.android.chrome Chrome`\n\n' +
                  u'/unwatch `<app_id_or_url>`\nStop watching for reviews for an application.')
 
-
     def _cmd_echo(self, chat_id, cmd_args):
         return cmd_args
-
 
     @defer.inlineCallbacks
     def _cmd_watch(self, chat_id, cmd_args):
@@ -149,18 +144,16 @@ class Bot(service.Service, MessagePlugin):
         res = yield self._gp_watcher.watch(chat_id, app_name, app_desc)
         if not res:
             defer.returnValue(_(u'Already watching: [%(app_desc)s](%(app_url)s)') %
-                                {'app_desc': app_desc, 'app_url': app_url})
+                              {'app_desc': app_desc, 'app_url': app_url})
 
         defer.returnValue(_(u'Added for watching: [%(app_desc)s](%(app_url)s)') %
-                                {'app_desc': app_desc, 'app_url': app_url})
-
+                          {'app_desc': app_desc, 'app_url': app_url})
 
     def _to_app_name(self, app_str):
         if app_str.startswith('http'):
             # extract app symbolic name from its gp page url
             return gp_app_name(app_str)
         return app_str
-
 
     @defer.inlineCallbacks
     def _cmd_watch_list(self, chat_id):
@@ -174,7 +167,6 @@ class Bot(service.Service, MessagePlugin):
         else:
             msg = _(u'No watched apps.')
         defer.returnValue(msg)
-
 
     @defer.inlineCallbacks
     def _cmd_unwatch(self, chat_id, app_str):
@@ -196,19 +188,17 @@ class Bot(service.Service, MessagePlugin):
         _app_name, app_desc = app
         app_url = gp_app_url(app_name)
         defer.returnValue(_(u'Removed from watched: [%(app_desc)s](%(app_url)s)') %
-                                {'app_desc': app_desc, 'app_url': app_url})
-
+                          {'app_desc': app_desc, 'app_url': app_url})
 
     @defer.inlineCallbacks
     def _fetch_app_data(self, app_url):
         resp = yield treq.get(app_url)
-        yield sleep(0) # switch to main thread
+        yield sleep(0)  # switch to main thread
         if resp.code == http.OK:
             app_data = yield treq.content(resp)
-            yield sleep(0) # switch to main thread
+            yield sleep(0)  # switch to main thread
             defer.returnValue(app_data)
         defer.returnValue(None)
-
 
     @defer.inlineCallbacks
     def send_message(self, chat_id, message):
