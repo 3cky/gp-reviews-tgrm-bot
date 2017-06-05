@@ -79,7 +79,7 @@ class MarketSession(object):
             data = data.split()
             params = {}
             for d in data:
-                k, v = d.decode().split("=")
+                k, v = d.decode().split("=", 1)
                 params[k.strip()] = v.strip()
             if "Auth" in params:
                 self.setAuthSubToken(params["Auth"])
@@ -94,7 +94,7 @@ class MarketSession(object):
                     d = d.strip()
                     if d:
                         k, v = d.split("=", 1)
-                        params[k.strip()] = v.strip()
+                        params[k.strip().lower()] = v.strip()
                 if "error" in params:
                     raise LoginError(params["error"])
                 else:
