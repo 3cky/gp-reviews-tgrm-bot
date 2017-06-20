@@ -3,6 +3,8 @@
 	<name>gp-reviews-tgrm-bot</name>
 	<comment></comment>
 	<projects>
+		<project>TelegramBotAPI</project>
+		<project>txTelegramBot</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -5,24 +5,18 @@ Created on 20-Jan-2017
 @author: 3cky
 '''
 
-from twisted.python import log, failure
 from twisted.web import http
 from twisted.internet import defer
 from twisted.application import service
 
-from TelegramBotAPI.types import sendMessage
-
-from TelegramBot.plugin.message import MessagePlugin
+from TelegramBot.plugin.bot import BotPlugin
 
 from tgrmbot.util import sleep, gp_app_name, gp_app_desc, gp_app_url
 
 import treq
-import time
-
-MESSAGE_SEND_DELAY = 1.0  # message send delay in seconds
 
 
-class Bot(service.Service, MessagePlugin):
+class Bot(service.Service, BotPlugin):
     '''
     Telegram chat bot.
 
@@ -30,6 +24,7 @@ class Bot(service.Service, MessagePlugin):
     name = 'tgrmbot_bot'
 
     def __init__(self, db, l10n_support):
+        BotPlugin.__init__(self)
         self.db = db
         self.l10n_support = l10n_support
 
@@ -37,74 +32,34 @@ class Bot(service.Service, MessagePlugin):
         self._gp_watcher = self.parent.getServiceNamed('tgrmbot_gp_watcher')
         self._last_message_send = 0.
 
-    @defer.inlineCallbacks
-    def on_update(self, update):
-        msg = getattr(update, 'message', None)
-        if msg is None:
-            msg = getattr(update, 'channel_post', None)
+    def on_unknown_command(self, cmd):
+        return _(u'Unknown command: /%(cmd)s\n' +
+                 u'Please use /help for list of available commands.') % {'cmd': cmd}
 
-        log.msg("on_update: msg: %s" % msg)
-        if msg is not None and hasattr(msg, 'text') and hasattr(msg, 'entities') and \
-                next((True for e in getattr(msg, 'entities') if e.type == 'bot_command'), False):
-            cmd_args = msg.text.split(' ', 1)
-            if len(cmd_args) == 2:
-                cmd, args = cmd_args
-                args = args.strip()
-            else:
-                cmd = cmd_args[0]
-                args = None
+    def on_command_start(self, _cmd_args, _cmd_msg):
+        return _(u'Hello, I\'m *Google Play app reviews watching bot*.\n' +
+                 'For help, please use /help command.')
 
-            resp = yield self._handle_cmd(msg.chat.id, cmd, args)
-
-            if resp is not None:
-                yield self.send_message(msg.chat.id, resp)
-
-        defer.returnValue(True)
-
-    @defer.inlineCallbacks
-    def _handle_cmd(self, chat_id, cmd, args):
-        # strip bot name from command
-        amp_index = cmd.find('@')
-        cmd_short = cmd if (amp_index < 0) else cmd[:amp_index]
-        try:
-            if cmd_short == '/start':
-                resp = self._cmd_start()
-            elif cmd_short == '/help':
-                resp = self._cmd_help()
-            elif cmd_short == '/watch':
-                resp = yield self._cmd_watch(chat_id, args)
-            elif cmd_short == '/unwatch':
-                resp = yield self._cmd_unwatch(chat_id, args)
-            elif cmd_short == '/echo':
-                resp = self._cmd_echo(chat_id, args)
-            else:
-                resp = _(u'Unknown command: %(cmd)s\n' +
-                         u'Please use /help for list of available commands.') % {'cmd': cmd}
-        except Exception as e:
-            f = failure.Failure()
-            log.err(f, 'Error while handling command \'%s %s\': %s' % (cmd, args if args else '', e,))
-            resp = 'ERROR: [%s] (see log file for details)' % str(e)
-        defer.returnValue(resp)
-
-    def _cmd_start(self):
-        return _(u'Hello, I\'m *Google Play app reviews watching bot*.\nFor help, please use /help command.')
-
-    def _cmd_help(self):
+    def on_command_help(self, _cmd_args, _msg):
         return _(u'*Available commands:*\n\n' +
-                 u'/watch `[app_id_or_url [app_description]]`\nStart watching for reviews for an application. ' +
+                 u'/watch `[app_id_or_url [app_description]]`\n' +
+                 'Start watching for reviews for an application. ' +
                  u'Command without arguments shows the list of watched applications. ' +
-                 u'Example:\n/watch `https://play.google.com/store/apps/details?id=com.android.chrome Chrome`\n\n' +
+                 u'Example:\n/watch `https://play.google.com/store/apps/details' +
+                 '?id=com.android.chrome Chrome`\n\n' +
                  u'/unwatch `<app_id_or_url>`\nStop watching for reviews for an application.')
 
-    def _cmd_echo(self, chat_id, cmd_args):
+    def on_command_echo(self, cmd_args, _cmd_msg):
         return cmd_args
 
     @defer.inlineCallbacks
-    def _cmd_watch(self, chat_id, cmd_args):
+    def on_command_watch(self, cmd_args, cmd_msg):
         '''
         Format: /watch [app_id_or_url [app_desc]]
 
         '''
+        chat_id = cmd_msg.chat.id
+
         if cmd_args is None or not cmd_args:
             msg = yield self._cmd_watch_list(chat_id)
             defer.returnValue(msg)
@@ -169,7 +124,7 @@ class Bot(service.Service, MessagePlugin):
         defer.returnValue(msg)
 
     @defer.inlineCallbacks
-    def _cmd_unwatch(self, chat_id, app_str):
+    def on_command_unwatch(self, app_str, cmd_msg):
         '''
         Format: /unwatch <app_id_or_url>
 
@@ -181,7 +136,7 @@ class Bot(service.Service, MessagePlugin):
         if app_name is None or not app_name:
             defer.returnValue(_(u'Invalid app to unwatch: `%(app_str)s`') % {'app_str': app_str})
 
-        app = yield self._gp_watcher.unwatch(chat_id, app_name)
+        app = yield self._gp_watcher.unwatch(cmd_msg.chat.id, app_name)
         if not app:
             defer.returnValue(_(u'App not watched: `%(app_name)s`') % {'app_name': app_name})
 
@@ -199,22 +154,6 @@ class Bot(service.Service, MessagePlugin):
             yield sleep(0)  # switch to main thread
             defer.returnValue(app_data)
         defer.returnValue(None)
-
-    @defer.inlineCallbacks
-    def send_message(self, chat_id, message):
-        # throttle message send, if needed
-        last_message_send_elapsed = time.time() - self._last_message_send
-        if last_message_send_elapsed < MESSAGE_SEND_DELAY:
-            yield sleep(MESSAGE_SEND_DELAY-last_message_send_elapsed)
-        self._last_message_send = time.time()
-
-        # do message send with markdown enabled
-        m = sendMessage()
-        m.chat_id = chat_id
-        m.text = message
-        m.parse_mode = 'Markdown'
-        m.disable_web_page_preview = True
-        yield self.send_method(m)
 
     @defer.inlineCallbacks
     def send_messages(self, chat_id, messages):
