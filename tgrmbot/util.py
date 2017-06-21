@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Created on 21-Feb-2017
 
@@ -6,7 +7,7 @@ Created on 21-Feb-2017
 
 from twisted.internet import reactor, defer
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import re
 
@@ -14,17 +15,19 @@ import babel.dates
 
 GP_APP_URL = u'https://play.google.com/store/apps/details?id={app_name}&hl={lang}'
 
-GP_REVIEW_URL = u'https://play.google.com/apps/publish/?dev_acc={dev_id}#ReviewDetailsPlace:p={app_id}&reviewid={review_id}'
+GP_REVIEW_URL = u'''https://play.google.com/apps/publish/?dev_acc={dev_id}'''
+'''#ReviewDetailsPlace:p={app_id}&reviewid={review_id}'''
 
 GP_APP_ID_REGEX = r'id=([a-zA_Z_][.\w]*)'
 GP_APP_DESC_REGEX = r'<title id="main-title">(.+) - Android Apps on Google Play</title>'
+
 
 def sleep(secs):
     '''
     Create deferred for pause to given timespan (in seconds)
     '''
     d = defer.Deferred()
-    reactor.callLater(secs, d.callback, None)
+    reactor.callLater(secs, d.callback, None)  # @UndefinedVariable
     return d
 
 
@@ -34,6 +37,13 @@ def format_datetime(timestamp_msec):
     '''
     date = datetime.fromtimestamp(timestamp_msec / 1000.0)
     return babel.dates.format_datetime(date)
+
+
+def format_timedelta(timedelta_msec):
+    '''
+    Convert given time delta (in milliseconds) to localized string
+    '''
+    return babel.dates.format_timedelta(timedelta(milliseconds=timedelta_msec))
 
 
 def gp_app_name(app_url):

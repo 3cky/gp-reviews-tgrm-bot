@@ -89,12 +89,13 @@ class DataStorage(object):
         '''
         return self._dbpool.runQuery('DELETE FROM reviews WHERE app_id = ?', (app_id,))
 
-    def update_review(self, review_id, rating, comment):
+    def update_review(self, review_id, timestamp, rating, comment):
         '''
         Update an application review data.
         '''
-        return self._dbpool.runQuery('UPDATE reviews SET rating = ?, comment = ? WHERE id = ?',
-                                     (rating, comment, review_id,))
+        return self._dbpool.runQuery(
+            'UPDATE reviews SET timestamp = ?, rating = ?, comment = ? WHERE id = ?',
+            (timestamp, rating, comment, review_id,))
 
     def add_watcher(self, app_id, chat_id):
         '''

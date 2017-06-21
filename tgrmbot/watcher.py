@@ -127,19 +127,22 @@ class GpReviewsWatcher(service.Service):
                                     'lang': gp_lang})
             else:
                 # review with given author ID already seen, check for changes
-                review_id, _app_id, _author_id, _author_name, _timestamp, \
+                review_id, _app_id, _author_id, _author_name, old_review_timestamp, \
                     old_review_rating, old_review_comment, _lang = db_reviews[0]
                 if (review_rating != old_review_rating) or (review_comment != old_review_comment):
                     # review updated, will update database and notify
                     log.msg('Found updated review for %s from author: %s' %
                             (app_name, review_author_id,))
-                    yield self.db.update_review(review_id, review_rating, review_comment)
+                    yield self.db.update_review(review_id, review_timestamp,
+                                                review_rating, review_comment)
                     app_reviews.append({'timestamp': review_timestamp,
                                         'version': gp_review.get('documentVersion'),
                                         'device': gp_review.get('deviceName'),
                                         'rating': review_rating,
                                         'title': gp_review.get('title'),
                                         'comment': review_comment,
+                                        'old_timestamp': old_review_timestamp,
+                                        'old_timedelta': review_timestamp-old_review_timestamp,
                                         'old_rating': old_review_rating,
                                         'old_comment': old_review_comment,
                                         'lang': gp_lang})

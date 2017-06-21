@@ -5,7 +5,7 @@
 ```
 {{ review.comment }}
 ```
-{% if review.old_rating %}_{% trans %}Changed from:{% endtrans %}_
+{% if review.old_rating %}_{% trans %}Changed from{% endtrans %} ({{ review.old_timedelta|timedelta }} {% trans %}ago{% endtrans %}):_
 {% for rating in range(0, 5) %}{% if review.old_rating > rating %}★{% else %}☆{% endif %}{% endfor %}
 ```
 {{ review.old_comment }}

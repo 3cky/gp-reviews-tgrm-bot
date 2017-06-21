@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-27 17:16+0300\n"
+"POT-Creation-Date: 2017-06-21 18:22+0300\n"
 "PO-Revision-Date: 2015-07-16 12:30+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_US\n"
@@ -14,28 +14,28 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.3.4\n"
+"Generated-By: Babel 2.4.0\n"
 
-#: tgrmbot/bot.py:79
+#: tgrmbot/bot.py:36
 #, python-format
 msgid ""
 "Unknown command: /%(cmd)s\n"
 "Please use /help for list of available commands."
 msgstr ""
 
-#: tgrmbot/bot.py:88
+#: tgrmbot/bot.py:40
 msgid ""
 "Hello, I'm *Google Play app reviews watching bot*.\n"
 "For help, please use /help command."
 msgstr ""
 
-#: tgrmbot/bot.py:92
+#: tgrmbot/bot.py:44
 msgid ""
 "*Available commands:*\n"
 "\n"
 "/watch `[app_id_or_url [app_description]]`\n"
-"Start watching for reviews for an application. Command without arguments"
-" shows the list of watched applications. Example:\n"
+"Start watching for reviews for an application. Command without arguments "
+"shows the list of watched applications. Example:\n"
 "/watch `https://play.google.com/store/apps/details?id=com.android.chrome "
 "Chrome`\n"
 "\n"
@@ -43,55 +43,59 @@ msgid ""
 "Stop watching for reviews for an application."
 msgstr ""
 
-#: tgrmbot/bot.py:126
+#: tgrmbot/bot.py:80
 #, python-format
 msgid "Invalid app: `%(app_str)s`"
 msgstr ""
 
-#: tgrmbot/bot.py:133
+#: tgrmbot/bot.py:87
 #, python-format
 msgid "App not found: %(app_url)s"
 msgstr ""
 
-#: tgrmbot/bot.py:144
+#: tgrmbot/bot.py:101
 #, python-format
 msgid "Already watching: [%(app_desc)s](%(app_url)s)"
 msgstr ""
 
-#: tgrmbot/bot.py:147
+#: tgrmbot/bot.py:104
 #, python-format
 msgid "Added for watching: [%(app_desc)s](%(app_url)s)"
 msgstr ""
 
-#: tgrmbot/bot.py:162
+#: tgrmbot/bot.py:117
 msgid "Watched apps:"
 msgstr ""
 
-#: tgrmbot/bot.py:168
+#: tgrmbot/bot.py:123
 msgid "No watched apps."
 msgstr ""
 
-#: tgrmbot/bot.py:179
+#: tgrmbot/bot.py:133
 msgid "Please specify app to remove from watched."
 msgstr ""
 
-#: tgrmbot/bot.py:183
+#: tgrmbot/bot.py:137
 #, python-format
 msgid "Invalid app to unwatch: `%(app_str)s`"
 msgstr ""
 
-#: tgrmbot/bot.py:187
+#: tgrmbot/bot.py:141
 #, python-format
 msgid "App not watched: `%(app_name)s`"
 msgstr ""
 
-#: tgrmbot/bot.py:191
+#: tgrmbot/bot.py:145
 #, python-format
 msgid "Removed from watched: [%(app_desc)s](%(app_url)s)"
 msgstr ""
 
 #: tgrmbot/templates/review.md:8
-msgid "Changed from:"
+msgid "Changed from"
+msgstr ""
+
+#: tgrmbot/templates/review.md:8
+msgid "ago"
 msgstr ""
 
 #~ msgid "New"
