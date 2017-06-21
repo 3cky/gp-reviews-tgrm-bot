@@ -6,6 +6,8 @@ Created on 20-Jan-2017
 '''
 
 import os
+import sys
+import logging
 
 from zope.interface import implementer
 
@@ -29,30 +31,30 @@ import codecs
 
 import humanfriendly
 
-
-import logging
-logging.basicConfig()
-logging.getLogger().setLevel(logging.INFO)
-
 TAP_NAME = "gp-reviews-tgrm-bot"
 
 DEFAULT_DB_FILENAME = 'db.sqlite'
 
 DEFAULT_NICKNAME = TAP_NAME
 
-DEFAULT_POLL_PERIOD = 600 # 10m
+DEFAULT_POLL_PERIOD = 600  # 10m
 DEFAULT_POLL_DELAY = 5
 
 DEFAULT_LANG = 'en'
 
+LOG_FORMAT = '[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s'
+
+
 class ConfigurationError(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
 
 
 class Options(usage.Options):
+    optFlags = [["debug", "d", "Enable debug output"]]
     optParameters = [["config", "c", None, 'Configuration file name']]
 
 
@@ -70,10 +72,15 @@ class ServiceManager(object):
         application = service.Application(TAP_NAME)
         serviceCollection = service.IServiceCollection(application)
 
-        # check confguration file is specified and exists
+        debug = options['debug']
+
+        logging.basicConfig(stream=sys.stdout, level=logging.DEBUG if debug else logging.INFO,
+                            format=LOG_FORMAT)
+
+        # check configuration file is specified and exists
         if not options["config"]:
             raise ValueError('Configuration file not specified (try to check --help option)')
-        cfgFileName = options["config"];
+        cfgFileName = options["config"]
         if not os.path.isfile(cfgFileName):
             raise ConfigurationError('Configuration file not found:', cfgFileName)
 
@@ -90,12 +97,14 @@ class ServiceManager(object):
         googlePassword = cfg.get('google', 'password')
         # get ANDROID_ID from configuration
         if not cfg.has_option('google', 'android_id'):
-            raise ConfigurationError('ANDROID_ID must be specified in configuration file [account] section')
+            raise ConfigurationError('ANDROID_ID must be specified in configuration file ' +
+                                     '[account] section')
         androidId = cfg.get('google', 'android_id')
 
         # get Telegram token from configuration
         if not cfg.has_option('telegram', 'token'):
-            raise ConfigurationError('Telegram API token must be specified in configuration file [telegram] section')
+            raise ConfigurationError('Telegram API token must be specified ' +
+                                     'in configuration file [telegram] section')
         token = cfg.get('telegram', 'token')
 
         # default language
@@ -108,15 +117,16 @@ class ServiceManager(object):
         templateRenderer = TemplateRenderer(l10n_support)
 
         # initialize data storage
-        dbFilename = cfg.get('db', 'filename') if cfg.has_option('db', 'filename') else DEFAULT_DB_FILENAME
+        dbFilename = cfg.get('db', 'filename') if cfg.has_option('db', 'filename') \
+            else DEFAULT_DB_FILENAME
         db = DataStorage(dbFilename)
 
         pollPeriod = humanfriendly.parse_timespan(cfg.get('poll', 'period')) \
-                if cfg.has_option('poll', 'period') else DEFAULT_POLL_PERIOD
+            if cfg.has_option('poll', 'period') else DEFAULT_POLL_PERIOD
         pollDelay = humanfriendly.parse_timespan(cfg.get('poll', 'delay')) \
-                if cfg.has_option('poll', 'delay') else DEFAULT_POLL_DELAY
+            if cfg.has_option('poll', 'delay') else DEFAULT_POLL_DELAY
         langs = [lang.strip() for lang in cfg.get('poll', 'lang').split(',')] \
-                if cfg.has_option('poll', 'lang') else [ DEFAULT_LANG ]
+            if cfg.has_option('poll', 'lang') else [DEFAULT_LANG]
 
         watcher = GpReviewsWatcher(db, templateRenderer, googleLogin, googlePassword,
                                    androidId, pollPeriod, pollDelay, langs)
@@ -128,7 +138,7 @@ class ServiceManager(object):
         telegramBot = BotService(plugins=[bot])
         telegramBot.setServiceParent(application)
 
-        client = TelegramClient(token, telegramBot.on_update, debug=True)
+        client = TelegramClient(token, telegramBot.on_update, debug=debug)
         client.setServiceParent(application)
 
         return serviceCollection
