@@ -19,10 +19,10 @@ msgstr ""
 #: tgrmbot/bot.py:79
 #, python-format
 msgid ""
-"Unknown command: %(cmd)s\n"
+"Unknown command: /%(cmd)s\n"
 "Please use /help for list of available commands."
 msgstr ""
-"Неизвестная команда: %(cmd)s\n"
+"Неизвестная команда: /%(cmd)s\n"
 "Используйте /help для получения списка доступных команд."
 
 #: tgrmbot/bot.py:88

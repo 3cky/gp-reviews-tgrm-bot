@@ -19,7 +19,7 @@ msgstr ""
 #: tgrmbot/bot.py:79
 #, python-format
 msgid ""
-"Unknown command: %(cmd)s\n"
+"Unknown command: /%(cmd)s\n"
 "Please use /help for list of available commands."
 msgstr ""
 
@@ -34,13 +34,13 @@ msgid ""
 "*Available commands:*\n"
 "\n"
 "/watch `[app_id_or_url [app_description]]`\n"
-"Start watching for comments for an application. Command without arguments"
+"Start watching for reviews for an application. Command without arguments"
 " shows the list of watched applications. Example:\n"
 "/watch `https://play.google.com/store/apps/details?id=com.android.chrome "
 "Chrome`\n"
 "\n"
 "/unwatch `<app_id_or_url>`\n"
-"Stop watching for comments for an application."
+"Stop watching for reviews for an application."
 msgstr ""
 
 #: tgrmbot/bot.py:126
