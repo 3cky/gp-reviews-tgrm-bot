@@ -7,32 +7,40 @@ import treq
 from twisted.internet import defer
 from twisted.web import http
 
-from google.protobuf import descriptor
-from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
+from google.protobuf import descriptor  # @UnresolvedImport
+from google.protobuf.internal.containers \
+    import RepeatedCompositeFieldContainer  # @UnresolvedImport
+
+import gpsoauth
 
 import tgrmbot.googleplay.market_pb2 as market_proto
+
 
 class LoginError(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
+
 
 class RequestError(Exception):
     def __init__(self, value, err_code=-1):
         self.value = value
         self.err_code = err_code
+
     def __str__(self):
         s = repr(self.value)
         if self.err_code > 0:
             s = "HTTP Error: " + str(self.err_code) + "\n" + s
         return s
 
+
 class MarketSession(object):
     URL_LOGIN = "https://android.clients.google.com/auth"
     HOST_API_REQUEST = "https://android.clients.google.com/fdfe/"
-    URL_REVIEWS = HOST_API_REQUEST + "rev";
-    SERVICE = "androidmarket";
+    URL_REVIEWS = HOST_API_REQUEST + "rev"
+    SERVICE = "androidmarket"
     ACCOUNT_TYPE_HOSTED_OR_GOOGLE = "HOSTED_OR_GOOGLE"
     authSubToken = None
     loggedIn = False
@@ -50,8 +58,9 @@ class MarketSession(object):
         for po in protoObj:
             msg = dict()
             for fielddesc, value in po.ListFields():
-                #print value, type(value), getattr(value, '__iter__', False)
-                if fielddesc.type == descriptor.FieldDescriptor.TYPE_GROUP or isinstance(value, RepeatedCompositeFieldContainer):
+                # print value, type(value), getattr(value, '__iter__', False)
+                if fielddesc.type == descriptor.FieldDescriptor.TYPE_GROUP or \
+                        isinstance(value, RepeatedCompositeFieldContainer):
                     msg[fielddesc.name] = self._toDict(value)
                 else:
                     msg[fielddesc.name] = value
@@ -67,8 +76,10 @@ class MarketSession(object):
         self.authSubToken = authSubToken
 
     @defer.inlineCallbacks
-    def login(self, email, password, accountType = ACCOUNT_TYPE_HOSTED_OR_GOOGLE):
-        params = {"Email": email, "Passwd": password, "service": self.SERVICE,
+    def login(self, email, password, accountType=ACCOUNT_TYPE_HOSTED_OR_GOOGLE):
+        encryptedPassword = gpsoauth.google.signature(email, password, gpsoauth.android_key_7_3_29)
+        params = {"Email": email, "EncryptedPasswd": encryptedPassword,
+                  "service": self.SERVICE,
                   "accountType": accountType, "has_permission": "1",
                   "source": "android", "android_id": self.android_id,
                   "app": "com.android.vending", "sdk_version": "17",
@@ -89,6 +100,7 @@ class MarketSession(object):
         else:
             if resp.code == http.FORBIDDEN:
                 data = yield treq.content(resp)
+                print("resp.data: %s" % data)
                 params = {}
                 for d in data.decode().split('\n'):
                     d = d.strip()
@@ -129,10 +141,9 @@ class MarketSession(object):
             raise RequestError(e)
 
     @defer.inlineCallbacks
-    def getReviews(self, appid, startIndex = 0, entriesCount = 10, lang = 'en'):
-        response = yield self.execute(self.URL_REVIEWS,
-                                      {"doc": appid, "o": startIndex, "n": entriesCount, "sort": 0},
-                                      lang)
+    def getReviews(self, appid, startIndex=0, entriesCount=10, lang='en'):
+        response = yield self.execute(self.URL_REVIEWS, {"doc": appid, "o": startIndex,
+                                                         "n": entriesCount, "sort": 0}, lang)
         result = []
         rp = response.payload
         if rp.HasField("reviewResponse"):
