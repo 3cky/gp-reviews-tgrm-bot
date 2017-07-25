@@ -1,4 +1,6 @@
-option java_package = "com.akdeniz.googleplaycrawler";
+syntax = "proto2";
+option java_package = "com.github.yeriomin.playstoreapi";
+option java_multiple_files = true;
 
 message AndroidAppDeliveryData {
   optional int64 downloadSize = 1;
@@ -87,12 +89,24 @@ message BookSubject {
 message BrowseLink {
   optional string name = 1;
   optional string dataUrl = 3;
+  optional Image icon = 5;
+  optional UnknownCategoryContainer unknownCategoryContainer = 4;
+}
+message UnknownCategoryContainer {
+  optional CategoryIdContainer categoryIdContainer = 5;
+}
+message CategoryIdContainer {
+  optional string categoryId = 4;
 }
 message BrowseResponse {
   optional string contentsUrl = 1;
   optional string promoUrl = 2;
   repeated BrowseLink category = 3;
   repeated BrowseLink breadcrumb = 4;
+  optional CategoryContainer categoryContainer = 9;
+}
+message CategoryContainer {
+  repeated BrowseLink category = 4;
 }
 message AddressChallenge {
   optional string responseAddressParam = 1;
@@ -189,6 +203,9 @@ message PurchaseStatusResponse {
   optional LibraryUpdate libraryUpdate = 6;
   optional Instrument rejectedInstrument = 7;
   optional AndroidAppDeliveryData appDeliveryData = 8;
+}
+message DeliveryResponse {
+  optional AndroidAppDeliveryData appDeliveryData = 2;
 }
 
 message Docid {
@@ -402,6 +419,7 @@ message Image {
     optional string titleLocalized = 11;
     optional string url = 12;
   }
+  optional string color = 15;
 }
 message TranslatedText {
   optional string text = 1;
@@ -443,6 +461,19 @@ message AppDetails {
   optional string uploadDate = 16;
   repeated FileMetadata file = 17;
   optional string appType = 18;
+  optional string containsAds = 30;
+  optional Dependencies dependencies = 34;
+}
+message Dependencies {
+  optional int32 unknown1 = 1;
+  optional int64 unknown2 = 2;
+  repeated Dependency dependency = 3;
+  optional int32 unknown3 = 4;
+}
+message Dependency {
+  optional string packageName = 1;
+  optional int32 version = 2;
+  optional int32 unknown4 = 4;
 }
 message ArtistDetails {
   optional string detailsUrl = 1;
@@ -600,7 +631,7 @@ message DocV2 {
   optional ContainerMetadata containerMetadata = 12;
   optional DocumentDetails details = 13;
   optional AggregateRating aggregateRating = 14;
-
+  optional RelatedLinks relatedLinks = 15;
   optional string detailsUrl = 16;
   optional string shareUrl = 17;
   optional string reviewsUrl = 18;
@@ -608,6 +639,45 @@ message DocV2 {
   optional string purchaseDetailsUrl = 20;
   optional bool detailsReusable = 21;
   optional string subtitle = 22;
+  optional Unknown25 unknown25 = 25;
+}
+message Unknown25 {
+  repeated Unknown25Item item = 2;
+}
+message Unknown25Item {
+  optional string label = 1;
+  optional Unknown25Container container = 3;
+}
+message Unknown25Container {
+  optional string value = 2;
+}
+message RelatedLinks {
+  optional RelatedLinksUnknown1 unknown1 = 10;
+  optional string privacyPolicyUrl = 18;
+  optional RelatedLink youMightAlsoLike = 24;
+  optional Rated rated = 29;
+  repeated RelatedLink relatedLinks = 34;
+  optional CategoryInfo categoryInfo = 53;
+}
+message RelatedLinksUnknown1 {
+  optional RelatedLinksUnknown2 unknown2 = 2;
+}
+message RelatedLinksUnknown2 {
+  optional string nextPageUrl = 3;
+}
+message Rated {
+  optional string label = 1;
+  optional Image image = 2;
+  optional string learnMoreHtmlLink = 4;
+}
+message RelatedLink {
+  optional string label = 1;
+  optional string url1 = 2;
+  optional string url2 = 3;
+}
+message CategoryInfo {
+  optional string appType = 1;
+  optional string appCategory = 2;
 }
 message EncryptedSubscriberInfo {
   optional string data = 1;
@@ -661,8 +731,8 @@ message LibraryAppDetails {
   optional int64 postDeliveryRefundWindowMsec = 4;
 }
 message LibraryInAppDetails {
-    optional string signedPurchaseData = 1;
-    optional string signature = 2;
+  optional string signedPurchaseData = 1;
+  optional string signature = 2;
 }
 message LibraryMutation {
   optional Docid docid = 1;
@@ -753,12 +823,14 @@ message Payload {
   optional BrowseResponse browseResponse = 7;
   optional PurchaseStatusResponse purchaseStatusResponse = 8;
   optional BulkDetailsResponse bulkDetailsResponse = 19;
+  optional DeliveryResponse deliveryResponse = 21;
   optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
   optional AndroidCheckinResponse androidCheckinResponse = 26;
+  optional SearchSuggestResponse searchSuggestResponse = 40;
 }
 message PreFetch {
   optional string url = 1;
-  optional bytes response = 2;
+  optional ResponseWrapper response = 2;
   optional string etag = 3;
   optional int64 ttl = 4;
   optional int64 softTtl = 5;
@@ -792,20 +864,33 @@ message Review {
   optional string replyText = 29;
   optional int64 replyTimestampMsec = 30;
   optional Author author = 31;
+  optional Author2 author2 = 33;
 }
 message Author {
   optional string name = 2;
   optional Avatar urls = 5;
 }
+message Author2 {
+  optional string personIdString = 1;
+  optional string personId = 2;
+  optional int32 unknown1 = 3;
+  optional int32 unknown2 = 4;
+  optional string name = 5;
+  optional Avatar urls = 10;
+  optional string googlePlusUrl = 19;
+  optional string googlePlusTagline = 22;
+}
 message Avatar {
-  optional bool unknown1 = 1;
+  optional int32 unknown1 = 1;
   optional string url = 5;
   optional string secureUrl = 7;
   optional bool unknown2 = 9;
+  optional bool unknown3 = 22;
 }
 message ReviewResponse {
   optional GetReviewsResponse getResponse = 1;
   optional string nextPageUrl = 2;
+  optional Review userReview = 3;
 }
 
 message RelatedSearch {
@@ -822,16 +907,31 @@ message SearchResponse {
   repeated Bucket bucket = 4;
   repeated DocV2 doc = 5;
   repeated RelatedSearch relatedSearch = 6;
+  optional string nextPageUrl = 10;
+}
+message SearchSuggestResponse {
+  repeated SearchSuggestEntry entry = 1;
+}
+message SearchSuggestEntry {
+  optional int32 type = 1;
+  optional string suggestedQuery = 2;
+  optional group ImageContainer = 5 {
+    optional string imageUrl = 5;
+  }
+  optional string title = 6;
+  optional group PackageNameContainer = 8 {
+    optional string packageName = 1;
+  }
 }
 
 
 message UploadDeviceConfigRequest {
-    optional DeviceConfigurationProto deviceConfiguration = 1;
-    optional string manufacturer = 2;
-    optional string gcmRegistrationId = 3;
+  optional DeviceConfigurationProto deviceConfiguration = 1;
+  optional string manufacturer = 2;
+  optional string gcmRegistrationId = 3;
 }
 message UploadDeviceConfigResponse {
-    optional string uploadDeviceConfigToken = 1;
+  optional string uploadDeviceConfigToken = 1;
 }
 message AndroidCheckinRequest {
   optional string imei = 1;
@@ -928,64 +1028,64 @@ message ClientLibraryState {
   optional string libraryId = 5;
 }
 message AndroidDataUsageProto {
-    optional int32 version = 1;
-    optional int64 currentReportMsec = 2;
-    repeated KeyToPackageNameMapping keyToPackageNameMapping = 3;
-    repeated PayloadLevelAppStat payloadLevelAppStat = 4;
-    repeated IpLayerNetworkStat ipLayerNetworkStat = 5;
+  optional int32 version = 1;
+  optional int64 currentReportMsec = 2;
+  repeated KeyToPackageNameMapping keyToPackageNameMapping = 3;
+  repeated PayloadLevelAppStat payloadLevelAppStat = 4;
+  repeated IpLayerNetworkStat ipLayerNetworkStat = 5;
 }
 message AndroidUsageStatsReport {
-    optional int64 androidId = 1;
-    optional int64 loggingId = 2;
-    optional UsageStatsExtensionProto usageStats = 3;
+  optional int64 androidId = 1;
+  optional int64 loggingId = 2;
+  optional UsageStatsExtensionProto usageStats = 3;
 }
 message AppBucket {
-    optional int64 bucketStartMsec = 1;
-    optional int64 bucketDurationMsec = 2;
-    repeated StatCounters statCounters = 3;
-    optional int64 operationCount = 4;
+  optional int64 bucketStartMsec = 1;
+  optional int64 bucketDurationMsec = 2;
+  repeated StatCounters statCounters = 3;
+  optional int64 operationCount = 4;
 }
 message CounterData {
-    optional int64 bytes = 1;
-    optional int64 packets = 2;
+  optional int64 bytes = 1;
+  optional int64 packets = 2;
 }
 message IpLayerAppStat {
-    optional int32 packageKey = 1;
-    optional int32 applicationTag = 2;
-    repeated AppBucket ipLayerAppBucket = 3;
+  optional int32 packageKey = 1;
+  optional int32 applicationTag = 2;
+  repeated AppBucket ipLayerAppBucket = 3;
 }
 message IpLayerNetworkBucket {
-    optional int64 bucketStartMsec = 1;
-    optional int64 bucketDurationMsec = 2;
-    repeated StatCounters statCounters = 3;
-    optional int64 networkActiveDuration = 4;
+  optional int64 bucketStartMsec = 1;
+  optional int64 bucketDurationMsec = 2;
+  repeated StatCounters statCounters = 3;
+  optional int64 networkActiveDuration = 4;
 }
 message IpLayerNetworkStat {
-    optional string networkDetails = 1;
-    optional int32 type = 2;
-    repeated IpLayerNetworkBucket ipLayerNetworkBucket = 3;
-    repeated IpLayerAppStat ipLayerAppStat = 4;
+  optional string networkDetails = 1;
+  optional int32 type = 2;
+  repeated IpLayerNetworkBucket ipLayerNetworkBucket = 3;
+  repeated IpLayerAppStat ipLayerAppStat = 4;
 }
 message KeyToPackageNameMapping {
-    optional int32 packageKey = 1;
-    optional string uidName = 2;
-    repeated PackageInfo sharedPackageList = 3;
+  optional int32 packageKey = 1;
+  optional string uidName = 2;
+  repeated PackageInfo sharedPackageList = 3;
 }
 message PackageInfo {
-    optional string pkgName = 1;
-    optional int32 versionCode = 2;
+  optional string pkgName = 1;
+  optional int32 versionCode = 2;
 }
 message PayloadLevelAppStat {
-    optional int32 packageKey = 1;
-    optional int32 applicationTag = 2;
-    repeated AppBucket payloadLevelAppBucket = 3;
+  optional int32 packageKey = 1;
+  optional int32 applicationTag = 2;
+  repeated AppBucket payloadLevelAppBucket = 3;
 }
 message StatCounters {
-    optional int32 networkProto = 1;
-    optional int32 direction = 2;
-    optional CounterData counterData = 3;
-    optional int32 fgBg = 4;
+  optional int32 networkProto = 1;
+  optional int32 direction = 2;
+  optional CounterData counterData = 3;
+  optional int32 fgBg = 4;
 }
 message UsageStatsExtensionProto {
-    optional AndroidDataUsageProto dataUsage = 1;
+  optional AndroidDataUsageProto dataUsage = 1;
 }
