@@ -21,6 +21,7 @@ class TemplateRenderer(object):
         self.templateEnvironment = Environment(loader=templateLoader,
                                                extensions=['jinja2.ext.i18n'])
         self.templateEnvironment.install_gettext_translations(l10n_support.get_translations())
+        self.templateEnvironment.globals['locale'] = l10n_support.locale
         self.templateEnvironment.filters['datetime'] = format_datetime
         self.templateEnvironment.filters['timedelta'] = format_timedelta
         self.templateEnvironment.filters['app_url'] = gp_app_url

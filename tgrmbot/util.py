@@ -31,19 +31,19 @@ def sleep(secs):
     return d
 
 
-def format_datetime(timestamp_msec):
+def format_datetime(timestamp_msec, locale=babel.dates.LC_TIME):
     '''
     Convert given Unix timestamp (in milliseconds) to localized date string
     '''
     date = datetime.fromtimestamp(timestamp_msec / 1000.0)
-    return babel.dates.format_datetime(date)
+    return babel.dates.format_datetime(date, locale=locale)
 
 
-def format_timedelta(timedelta_msec):
+def format_timedelta(timedelta_msec, locale=babel.dates.LC_TIME):
     '''
     Convert given time delta (in milliseconds) to localized string
     '''
-    return babel.dates.format_timedelta(timedelta(milliseconds=timedelta_msec))
+    return babel.dates.format_timedelta(timedelta(milliseconds=timedelta_msec), locale=locale)
 
 
 def gp_app_name(app_url):
