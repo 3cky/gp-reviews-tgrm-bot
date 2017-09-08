@@ -9,3 +9,6 @@ MANIFEST
 /twistd.pid
 /deploy.sh
 __pycache__/
+*.egg-info
+*.res
+*.sh

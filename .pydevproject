@@ -8,6 +8,5 @@
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">/home/avm/projects/venv/gp-reviews-tgrm-bot/bin/python</pydev_property>
 <pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH">
 <path>/home/avm/bin/protobuf/lib/python2.7/site-packages</path>
-<path>/home/avm/bin/protobuf/lib/python2.7/site-packages/protobuf-3.0.0a4.dev0-py2.7.egg</path>
 </pydev_pathproperty>
 </pydev_project>
