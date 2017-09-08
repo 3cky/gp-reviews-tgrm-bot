@@ -15,8 +15,10 @@ else:
 
 if protoc is None:
     sys.stderr.write('protoc not found. Is protobuf-compiler installed? \n'
-                     'Alternatively, you can point the PROTOC environment variable to protoc executable path.')
+                     'Alternatively, you can point the PROTOC environment '
+                     'variable to protoc executable path.')
     sys.exit(1)
+
 
 def generate_proto(source, require=True):
     """Invokes the Protocol Compiler to generate a _pb2.py from the given
@@ -29,8 +31,8 @@ def generate_proto(source, require=True):
     output = source.replace(".proto", "_pb2.py")
 
     if (not os.path.exists(output) or
-          (os.path.exists(source) and
-           os.path.getmtime(source) > os.path.getmtime(output))):
+        (os.path.exists(source) and
+         os.path.getmtime(source) > os.path.getmtime(output))):
         print("Generating %s..." % output)
 
     if not os.path.exists(source):
@@ -41,12 +43,14 @@ def generate_proto(source, require=True):
     if subprocess.call(protoc_command) != 0:
         sys.exit(-1)
 
+
 class gen_proto(build_py):
     def run(self):
         # Generate necessary .proto file if it doesn't exist.
         generate_proto("tgrmbot/googleplay/market.proto")
         # build_py is an old-style class, so super() doesn't work.
         build_py.run(self)
+
 
 setup(
     name='gp-reviews-tgrm-bot',
@@ -59,6 +63,7 @@ setup(
     package_data={'tgrmbot': ['templates/*.md',
                               'locales/en_US/LC_MESSAGES/messages.mo',
                               'locales/ru_RU/LC_MESSAGES/messages.mo']},
+    zip_safe=False,
     include_package_data=True,
     version='0.1.0',
 
