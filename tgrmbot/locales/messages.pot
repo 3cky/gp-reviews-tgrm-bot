@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-07-22 11:45+0300\n"
+"POT-Creation-Date: 2017-09-11 17:47+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,20 +17,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.4.0\n"
 
-#: tgrmbot/bot.py:37
+#: tgrmbot/bot.py:36
 #, python-format
 msgid ""
 "Unknown command: /%(cmd)s\n"
 "Please use /help for list of available commands."
 msgstr ""
 
-#: tgrmbot/bot.py:41
+#: tgrmbot/bot.py:40
 msgid ""
 "Hello, I'm *Google Play app reviews watching bot*.\n"
 "For help, please use /help command."
 msgstr ""
 
-#: tgrmbot/bot.py:45
+#: tgrmbot/bot.py:44
 msgid ""
 "*Available commands:*\n"
 "\n"
@@ -41,54 +41,74 @@ msgid ""
 "Chrome`\n"
 "\n"
 "/unwatch `<app_id_or_url>`\n"
-"Stop watching for reviews for an application."
+"Stop watching for reviews for an application.\n"
+"\n"
+"/ignore\n"
+"Add review author to ignore list. Command must be used in reply to review"
+" which author should be ignored."
 msgstr ""
 
-#: tgrmbot/bot.py:81
+#: tgrmbot/bot.py:82
 #, python-format
 msgid "Invalid app: `%(app_str)s`"
 msgstr ""
 
-#: tgrmbot/bot.py:88
+#: tgrmbot/bot.py:89
 #, python-format
 msgid "App not found: %(app_url)s"
 msgstr ""
 
-#: tgrmbot/bot.py:102
+#: tgrmbot/bot.py:103
 #, python-format
 msgid "Already watching: [%(app_desc)s](%(app_url)s)"
 msgstr ""
 
-#: tgrmbot/bot.py:105
+#: tgrmbot/bot.py:106
 #, python-format
 msgid "Added for watching: [%(app_desc)s](%(app_url)s)"
 msgstr ""
 
-#: tgrmbot/bot.py:118
+#: tgrmbot/bot.py:119
 msgid "Watched apps:"
 msgstr ""
 
-#: tgrmbot/bot.py:124
+#: tgrmbot/bot.py:125
 msgid "No watched apps."
 msgstr ""
 
-#: tgrmbot/bot.py:134
+#: tgrmbot/bot.py:135
 msgid "Please specify app to remove from watched."
 msgstr ""
 
-#: tgrmbot/bot.py:138
+#: tgrmbot/bot.py:139
 #, python-format
 msgid "Invalid app to unwatch: `%(app_str)s`"
 msgstr ""
 
-#: tgrmbot/bot.py:142
+#: tgrmbot/bot.py:143
 #, python-format
 msgid "App not watched: `%(app_name)s`"
 msgstr ""
 
-#: tgrmbot/bot.py:146
+#: tgrmbot/bot.py:147
 #, python-format
 msgid "Removed from watched: [%(app_desc)s](%(app_url)s)"
+msgstr ""
+
+#: tgrmbot/bot.py:158
+msgid "Please use this command in reply to message of reviewer to be ignored."
+msgstr ""
+
+#: tgrmbot/bot.py:165
+msgid "Can't find review author to ignore."
+msgstr ""
+
+#: tgrmbot/bot.py:169
+msgid "Reviewer already in ignore list."
+msgstr ""
+
+#: tgrmbot/bot.py:173
+msgid "Reviewer added to ignore list."
 msgstr ""
 
 #: tgrmbot/templates/review.md:8

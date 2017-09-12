@@ -5,6 +5,8 @@ Created on 20-Feb-2017
 @author: avm
 '''
 
+import time
+
 from twisted.python import log
 from twisted.application import service
 from twisted.internet import reactor, defer
@@ -92,6 +94,12 @@ class GpReviewsWatcher(service.Service):
                 # delay before check next application
                 yield sleep(self.poll_delay)
 
+        # purge old message track data from db
+        try:
+            yield self.db.purge_message_data()
+        except Exception as e:
+            log.err(e, "Can't purge old message track data from db")
+
         # delay before next applications poll cycle
         self._d_poll = sleep(self.poll_period)
         try:
@@ -111,6 +119,11 @@ class GpReviewsWatcher(service.Service):
             review_timestamp = gp_review.get('timestampMsec')
             review_rating = gp_review.get('starRating')
             review_comment = gp_review.get('comment')
+            # check author is ignored
+            author_ignored = yield self.check_author_ignored(review_author_id)
+            if author_ignored:
+                log.msg('Skipping review from ignored author: %s' % (review_author_id,))
+                continue
             # check for review with same author id
             db_reviews = yield self.db.get_reviews(app_id, review_author_id)
             if not db_reviews:
@@ -118,7 +131,8 @@ class GpReviewsWatcher(service.Service):
                 log.msg('Found new review for %s from author: %s' % (app_name, review_author_id,))
                 yield self.db.add_review(app_id, review_author_id, review_author_name,
                                          review_timestamp, review_rating, review_comment, gp_lang)
-                app_reviews.append({'timestamp': review_timestamp,
+                app_reviews.append({'author': review_author_id,
+                                    'timestamp': review_timestamp,
                                     'version': gp_review.get('documentVersion'),
                                     'device': gp_review.get('deviceName'),
                                     'rating': review_rating,
@@ -135,7 +149,8 @@ class GpReviewsWatcher(service.Service):
                             (app_name, review_author_id,))
                     yield self.db.update_review(review_id, review_timestamp,
                                                 review_rating, review_comment)
-                    app_reviews.append({'timestamp': review_timestamp,
+                    app_reviews.append({'author': review_author_id,
+                                        'timestamp': review_timestamp,
                                         'version': gp_review.get('documentVersion'),
                                         'device': gp_review.get('deviceName'),
                                         'rating': review_rating,
@@ -160,7 +175,36 @@ class GpReviewsWatcher(service.Service):
                                                      review=review)
                         for review in app_reviews]
             for chat_id in chat_ids:
-                yield self._bot.send_messages(chat_id, messages)
+                for i, message in enumerate(messages):
+                    # send notification message to chat
+                    try:
+                        sent_message = yield self._bot.send_message(chat_id, message)
+                    except Exception as e:
+                        log.err(e, "Can't send message: %s to chat: %s" % (message, chat_id))
+                        continue
+                    # store notification message tracking information
+                    try:
+                        yield self.db.add_message_data(chat_id, app_reviews[i]['author'],
+                                                       sent_message.message_id, sent_message.date)
+                    except Exception as e:
+                        log.err(e, "Can't store tracking info for notification message: %s" %
+                                (sent_message,))
+
+    @defer.inlineCallbacks
+    def review_author(self, chat_id, message_id):
+        d = yield self.db.get_message_data(chat_id, message_id)
+        if not d:
+            defer.returnValue(None)
+        defer.returnValue(d[0][2])
+
+    @defer.inlineCallbacks
+    def check_author_ignored(self, author_id):
+        d = yield self.db.get_ignored_author(author_id)
+        defer.returnValue(len(d) > 0)
+
+    @defer.inlineCallbacks
+    def ignore_author(self, author_id):
+        yield self.db.add_ignored_author(author_id, int(time.time()))
 
     @defer.inlineCallbacks
     def watch(self, chat_id, app_name, app_desc):

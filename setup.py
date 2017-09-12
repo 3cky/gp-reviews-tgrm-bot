@@ -65,7 +65,7 @@ setup(
                               'locales/ru_RU/LC_MESSAGES/messages.mo']},
     zip_safe=False,
     include_package_data=True,
-    version='0.1.0',
+    version='0.2.0',
 
     url='https://github.com/3cky/gp-reviews-tgrm-bot',
     author='Victor Antonovich',

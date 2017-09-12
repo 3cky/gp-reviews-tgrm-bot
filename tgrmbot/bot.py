@@ -5,9 +5,12 @@ Created on 20-Jan-2017
 @author: 3cky
 '''
 
+from twisted.python import log
 from twisted.web import http
 from twisted.internet import defer
 from twisted.application import service
+
+from TelegramBotAPI.types.methods import deleteMessage
 
 from TelegramBot.plugin.bot import BotPlugin
 
@@ -47,7 +50,9 @@ class Bot(service.Service, BotPlugin):
                  u'Command without arguments shows the list of watched applications. ' +
                  u'Example:\n/watch `https://play.google.com/store/apps/details' +
                  '?id=com.android.chrome Chrome`\n\n' +
-                 u'/unwatch `<app_id_or_url>`\nStop watching for reviews for an application.')
+                 u'/unwatch `<app_id_or_url>`\nStop watching for reviews for an application.\n\n' +
+                 u'/ignore\nAdd review author to ignore list. Command must be used in reply to ' +
+                 u'review which author should be ignored.')
 
     def on_command_echo(self, cmd_args, _cmd_msg):
         return cmd_args
@@ -146,6 +151,49 @@ class Bot(service.Service, BotPlugin):
                           {'app_desc': app_desc, 'app_url': app_url})
 
     @defer.inlineCallbacks
+    def on_command_ignore(self, _app_str, cmd_msg):
+        '''
+        Ignore reviews from user determined by replied message.
+        Format: /ignore
+
+        '''
+        if not hasattr(cmd_msg, 'reply_to_message') or cmd_msg.reply_to_message is None:
+            defer.returnValue(_(u'Please use this command in reply ' +
+                                'to message of reviewer to be ignored.'))
+
+        msg = cmd_msg.reply_to_message
+
+        review_author = yield self._gp_watcher.review_author(cmd_msg.chat.id, msg.message_id)
+        if review_author is None:
+            defer.returnValue(_(u"Can't find review author to ignore."))
+
+        already_ignored = yield self._gp_watcher.check_author_ignored(review_author)
+        if already_ignored:
+            defer.returnValue(_(u"Reviewer already in ignore list."))
+
+        yield self._gp_watcher.ignore_author(review_author)
+
+        r = yield self._delete_message(msg.chat.id, msg.message_id)
+        if r:
+            yield self._delete_message(cmd_msg.chat.id, cmd_msg.message_id)
+        else:
+            defer.returnValue(_(u"Reviewer added to ignore list."))
+
+        defer.returnValue(None)
+
+    @defer.inlineCallbacks
+    def _delete_message(self, chat_id, message_id):
+        m = deleteMessage()
+        m.chat_id = chat_id
+        m.message_id = message_id
+        try:
+            yield self.send_method(m)
+        except Exception as e:
+            log.err(e, "Can't delete message %s from chat %s" % (message_id, chat_id))
+            defer.returnValue(False)
+        defer.returnValue(True)
+
+    @defer.inlineCallbacks
     def _fetch_app_data(self, app_url):
         resp = yield treq.get(app_url)
         yield sleep(0)  # switch to main thread
@@ -154,8 +202,3 @@ class Bot(service.Service, BotPlugin):
             yield sleep(0)  # switch to main thread
             defer.returnValue(app_data)
         defer.returnValue(None)
-
-    @defer.inlineCallbacks
-    def send_messages(self, chat_id, messages):
-        for message in messages:
-            yield self.send_message(chat_id, message)

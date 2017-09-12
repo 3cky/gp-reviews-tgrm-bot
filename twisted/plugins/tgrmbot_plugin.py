@@ -9,7 +9,7 @@ import os
 import sys
 import logging
 
-from zope.interface import implementer
+from zope.interface import implementer  # @UnresolvedImport
 
 from twisted.python import usage
 from twisted.plugin import IPlugin
@@ -34,6 +34,7 @@ import humanfriendly
 TAP_NAME = "gp-reviews-tgrm-bot"
 
 DEFAULT_DB_FILENAME = 'db.sqlite'
+DEFAULT_DB_KEEP_MESSAGE_DATA_PERIOD = '7d'
 
 DEFAULT_NICKNAME = TAP_NAME
 
@@ -119,7 +120,10 @@ class ServiceManager(object):
         # initialize data storage
         dbFilename = cfg.get('db', 'filename') if cfg.has_option('db', 'filename') \
             else DEFAULT_DB_FILENAME
-        db = DataStorage(dbFilename)
+        dbKeepMessageDataPeriod = cfg.get('db', 'keep_message_data') \
+            if cfg.has_option('db', 'keep_message_data') else DEFAULT_DB_KEEP_MESSAGE_DATA_PERIOD
+        dbKeepMessageDataPeriod = humanfriendly.parse_timespan(dbKeepMessageDataPeriod)
+        db = DataStorage(dbFilename, dbKeepMessageDataPeriod)
 
         pollPeriod = humanfriendly.parse_timespan(cfg.get('poll', 'period')) \
             if cfg.has_option('poll', 'period') else DEFAULT_POLL_PERIOD
