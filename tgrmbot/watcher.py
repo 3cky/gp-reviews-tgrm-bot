@@ -6,6 +6,7 @@ Created on 20-Feb-2017
 '''
 
 import time
+import random
 
 from twisted.python import log
 from twisted.application import service
@@ -64,6 +65,7 @@ class GpReviewsWatcher(service.Service):
     def _check_app_reviews(self, session):
         log.msg('Checking for new application reviews...')
         apps = yield self.db.get_apps()
+        random.shuffle(apps)
         for app in apps:
             app_id, app_name, app_desc = app
             try:
@@ -81,14 +83,15 @@ class GpReviewsWatcher(service.Service):
                     # notify all related chats about new application reviews
                     yield self._notify_watchers(app_id, app_name, app_desc, app_reviews)
             except RequestError as re:
+                yield sleep(0)  # switch to main thread
                 if re.err_code == 401:
-                    log.err(re, 'Access denied while checking for new reviews ' +
-                            'for an application %s' % app_name)
+                    log.msg('Access denied while checking for new reviews ' +
+                            'for an application %s: %s' % (app_name, re))
                     session.loggedIn = False
-                    yield sleep(RELOGIN_TIMEOUT)
-                    break
+                    defer.returnValue(None)
                 log.err(re, 'Can\'t request new reviews for an application %s' % app_name)
             except Exception as e:
+                yield sleep(0)  # switch to main thread
                 log.err(e, 'Error while checking for new reviews for an application %s' % app_name)
             if app != apps[-1]:
                 # delay before check next application
