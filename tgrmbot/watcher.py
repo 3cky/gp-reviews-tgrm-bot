@@ -14,11 +14,12 @@ from twisted.internet import reactor, defer
 
 from tgrmbot.util import sleep
 
-from tgrmbot.googleplay.market import MarketSession, RequestError
-
-RELOGIN_TIMEOUT = 60  # 1m
+from tgrmbot.googleplay.market import MarketSession, RequestError, LoginError
 
 REVIEW_TEMPLATE_NAME = 'review.md'
+
+NUM_REQUEST_RETRIES = 3
+REQUEST_RETRY_TIMEOUT = 5  # in seconds
 
 
 class GpReviewsWatcher(service.Service):
@@ -49,17 +50,9 @@ class GpReviewsWatcher(service.Service):
         # poll cycle loop
         session = MarketSession(self.android_id)
         while reactor.running:  # @UndefinedVariable
-            if not session.loggedIn:
-                log.msg('Authorizing Google Play session...')
-                try:
-                    yield session.login(self.gp_login, self.gp_password)
-                    yield sleep(0)  # switch to main thread
-                except Exception as e:
-                    log.err(e, 'Can\'t authorize Google Play session')
-                    # delay before next login try
-                    yield sleep(RELOGIN_TIMEOUT)
-                    continue
             yield self._check_app_reviews(session)
+            # delay before next application reviews poll cycle
+            yield sleep(self.poll_period)
 
     @defer.inlineCallbacks
     def _check_app_reviews(self, session):
@@ -72,24 +65,44 @@ class GpReviewsWatcher(service.Service):
                 # get new reviews for an application
                 app_reviews = []
                 for gp_lang in self.gp_langs:
-                    lang_reviews = yield self._get_app_reviews(session, app_id, app_name, gp_lang)
-                    app_reviews.extend(lang_reviews)
+                    retry_num = 1
+                    while True:  # request retries loop
+                        try:
+                            if not session.loggedIn:
+                                log.msg('Authorizing Google Play session...')
+                                yield session.login(self.gp_login, self.gp_password)
+                                yield sleep(0)  # switch to the main thread
+
+                            lang_reviews = yield self._get_app_reviews(session, app_id, app_name,
+                                                                       gp_lang)
+                            yield sleep(0)  # switch to the main thread
+
+                            app_reviews.extend(lang_reviews)
+
+                            break  # request retries loop
+                        except LoginError as le:
+                            yield sleep(0)  # switch to the main thread
+                            log.msg('Google Play authorization failed, error: %s' % le)
+                            defer.returnValue(None)
+                        except RequestError as re:
+                            yield sleep(0)  # switch to the main thread
+                            if re.err_code == 401:
+                                session.loggedIn = False
+                            retry_num += 1
+                            if retry_num > NUM_REQUEST_RETRIES:
+                                log.msg('Request retries limit exceeded, error: %s' % re)
+                                defer.returnValue(None)
+                        yield sleep(REQUEST_RETRY_TIMEOUT)
+
                     if gp_lang != self.gp_langs[-1]:
                         # delay before check next gp_lang
                         yield sleep(self.poll_delay)
+
                 if app_reviews:
                     # sort app_reviews by creation time before notification
                     app_reviews.sort(key=lambda k: k.get('timestamp'))
                     # notify all related chats about new application reviews
                     yield self._notify_watchers(app_id, app_name, app_desc, app_reviews)
-            except RequestError as re:
-                yield sleep(0)  # switch to main thread
-                if re.err_code == 401:
-                    log.msg('Access denied while checking for new reviews ' +
-                            'for an application %s: %s' % (app_name, re))
-                    session.loggedIn = False
-                    defer.returnValue(None)
-                log.err(re, 'Can\'t request new reviews for an application %s' % app_name)
             except Exception as e:
                 yield sleep(0)  # switch to main thread
                 log.err(e, 'Error while checking for new reviews for an application %s' % app_name)
@@ -102,14 +115,6 @@ class GpReviewsWatcher(service.Service):
             yield self.db.purge_message_data()
         except Exception as e:
             log.err(e, "Can't purge old message track data from db")
-
-        # delay before next applications poll cycle
-        self._d_poll = sleep(self.poll_period)
-        try:
-            yield self._d_poll
-        except defer.CancelledError:
-            # pause canceled
-            pass
 
     @defer.inlineCallbacks
     def _get_app_reviews(self, session, app_id, app_name, gp_lang):
