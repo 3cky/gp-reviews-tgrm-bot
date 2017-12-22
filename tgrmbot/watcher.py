@@ -75,8 +75,6 @@ class GpReviewsWatcher(service.Service):
 
                             lang_reviews = yield self._get_app_reviews(session, app_id, app_name,
                                                                        gp_lang)
-                            yield sleep(0)  # switch to the main thread
-
                             app_reviews.extend(lang_reviews)
 
                             break  # request retries loop
