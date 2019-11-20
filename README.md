@@ -38,7 +38,7 @@ Use `/help` to get list of available commands.
 ## TODO
 
 * Switch from an unofficial outdated reverse-engineered Protobuf-based internal Google Play API
-(https://github.com/Akdeniz/google-play-crawler) to new official
+(https://github.com/Ksauder/googleplay-api) to new official
 [Google API for accessing application reviews](https://developers.google.com/android-publisher/api-ref/reviews).
 * Manage settings using bot commands.
 * Use Telegram Keyboards in addition to/instead of plain commands.

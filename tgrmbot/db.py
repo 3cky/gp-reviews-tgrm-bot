@@ -52,6 +52,10 @@ class DataStorage(object):
             'CREATE TABLE IF NOT EXISTS message_data (id INTEGER PRIMARY KEY AUTOINCREMENT, ' +
             'chat_id TEXT, author_id TEXT, message_id TEXT, timestamp INTEGER, ' +
             'UNIQUE(chat_id, message_id))')
+        # create google play auth data table
+        yield self._dbpool.runQuery(
+            'CREATE TABLE IF NOT EXISTS gp_auth_data ' +
+            '(id INTEGER PRIMARY KEY AUTOINCREMENT, android_id TEXT UNIQUE, auth_sub_token TEXT)')
 
     def get_apps(self):
         '''
@@ -200,3 +204,25 @@ class DataStorage(object):
         purge_timestamp = int(mktime(purge_datetime.timetuple()))
         return self._dbpool.runQuery('DELETE FROM message_data WHERE timestamp < ?',
                                      (purge_timestamp,))
+
+    def get_gp_auth_data(self):
+        '''
+        Get google play auth data as deferred list, empty or with one tuple
+        (android_id, auth_sub_token).
+        '''
+        return self._dbpool.runQuery('SELECT android_id, auth_sub_token ' +
+                                     'FROM gp_auth_data ORDER BY id DESC LIMIT 1')
+
+    def delete_gp_auth_data(self):
+        '''
+        Delete google play auth data.
+        '''
+        return self._dbpool.runQuery('DELETE FROM gp_auth_data')
+
+    def update_gp_auth_data(self, android_id, auth_sub_token):
+        '''
+        Update google play auth data.
+        '''
+        return self._dbpool.runQuery('INSERT OR REPLACE INTO gp_auth_data ' +
+                                     '    (android_id, auth_sub_token) ' +
+                                     ' VALUES (?, ?)', (android_id, auth_sub_token,))

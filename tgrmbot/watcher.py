@@ -14,7 +14,9 @@ from twisted.internet import reactor, defer
 
 from tgrmbot.util import sleep
 
-from tgrmbot.googleplay.market import MarketSession, RequestError, LoginError
+from tgrmbot.googleplay.market import MarketSession, RequestError
+
+from gpapi.googleplay import LoginError
 
 REVIEW_TEMPLATE_NAME = 'review.md'
 
@@ -29,13 +31,12 @@ class GpReviewsWatcher(service.Service):
     '''
     name = 'tgrmbot_gp_watcher'
 
-    def __init__(self, db, templateRenderer, gp_login, gp_password, android_id,
+    def __init__(self, db, templateRenderer, gp_login, gp_password,
                  poll_period, poll_delay, gp_langs):
         self.db = db
         self.templateRenderer = templateRenderer
         self.gp_login = gp_login
         self.gp_password = gp_password
-        self.android_id = android_id
         self.poll_period = poll_period
         self.poll_delay = poll_delay
         self.gp_langs = gp_langs
@@ -48,7 +49,11 @@ class GpReviewsWatcher(service.Service):
     @defer.inlineCallbacks
     def _run(self):
         # poll cycle loop
-        session = MarketSession(self.android_id)
+        gp_android_id = gp_auth_token_id = None
+        gp_auth_data = yield self.db.get_gp_auth_data()
+        if gp_auth_data:
+            gp_android_id, gp_auth_token_id = gp_auth_data[0]
+        session = MarketSession(self.gp_login, self.gp_password, gp_android_id, gp_auth_token_id)
         while reactor.running:  # @UndefinedVariable
             yield self._check_app_reviews(session)
             # delay before next application reviews poll cycle
@@ -68,9 +73,13 @@ class GpReviewsWatcher(service.Service):
                     retry_num = 1
                     while True:  # request retries loop
                         try:
-                            if not session.loggedIn:
+                            if not session.logged_in:
                                 log.msg('Authorizing Google Play session...')
-                                yield session.login(self.gp_login, self.gp_password)
+                                yield sleep(0)  # switch to the main thread
+                                session.login()
+                                # update google play auth data
+                                yield self.db.update_gp_auth_data(session.android_id,
+                                                                  session.auth_sub_token)
                                 yield sleep(0)  # switch to the main thread
 
                             lang_reviews = yield self._get_app_reviews(session, app_id, app_name,
@@ -85,7 +94,7 @@ class GpReviewsWatcher(service.Service):
                         except RequestError as re:
                             yield sleep(0)  # switch to the main thread
                             if re.err_code == 401:
-                                session.loggedIn = False
+                                session.logged_in = False
                             retry_num += 1
                             if retry_num > NUM_REQUEST_RETRIES:
                                 log.msg('Request retries limit exceeded, error: %s' % re)

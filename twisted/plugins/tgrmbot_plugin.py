@@ -96,11 +96,6 @@ class ServiceManager(object):
                                      'in configuration file [account] section')
         googleLogin = cfg.get('google', 'login')
         googlePassword = cfg.get('google', 'password')
-        # get ANDROID_ID from configuration
-        if not cfg.has_option('google', 'android_id'):
-            raise ConfigurationError('ANDROID_ID must be specified in configuration file ' +
-                                     '[account] section')
-        androidId = cfg.get('google', 'android_id')
 
         # get Telegram token from configuration
         if not cfg.has_option('telegram', 'token'):
@@ -133,7 +128,7 @@ class ServiceManager(object):
             if cfg.has_option('poll', 'lang') else [DEFAULT_LANG]
 
         watcher = GpReviewsWatcher(db, templateRenderer, googleLogin, googlePassword,
-                                   androidId, pollPeriod, pollDelay, langs)
+                                   pollPeriod, pollDelay, langs)
         watcher.setServiceParent(application)
 
         bot = Bot(db, l10n_support)

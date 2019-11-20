@@ -4,24 +4,12 @@
 
 import treq
 
+import locale
+
 from twisted.internet import defer
 from twisted.web import http
 
-from google.protobuf import descriptor  # @UnresolvedImport
-from google.protobuf.internal.containers \
-    import RepeatedCompositeFieldContainer  # @UnresolvedImport
-
-import gpsoauth
-
-import tgrmbot.googleplay.market_pb2 as market_proto
-
-
-class LoginError(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
+from gpapi.googleplay import GooglePlayAPI, googleplay_pb2
 
 
 class RequestError(Exception):
@@ -37,100 +25,34 @@ class RequestError(Exception):
 
 
 class MarketSession(object):
-    URL_LOGIN = "https://android.clients.google.com/auth"
     HOST_API_REQUEST = "https://android.clients.google.com/fdfe/"
     URL_REVIEWS = HOST_API_REQUEST + "rev"
-    SERVICE = "androidmarket"
-    ACCOUNT_TYPE_HOSTED_OR_GOOGLE = "HOSTED_OR_GOOGLE"
-    authSubToken = None
-    loggedIn = False
 
-    def __init__(self, android_id):
-        self.android_id = android_id.encode("ascii")
+    def __init__(self, gp_login, gp_password, android_id=None, auth_sub_token=None):
+        self.logged_in = False
+        self.gp_login = gp_login
+        self.gp_password = gp_password
+        self.android_id = android_id
+        self.auth_sub_token = auth_sub_token
+        self.server = GooglePlayAPI(locale.getdefaultlocale()[0], None)
 
-    def _toDict(self, protoObj):
-        iterable = False
-        if isinstance(protoObj, RepeatedCompositeFieldContainer):
-            iterable = True
+    def login(self):
+        if self.android_id and self.auth_sub_token:
+            self.server.login(None, None, int(self.android_id), self.auth_sub_token)
         else:
-            protoObj = [protoObj]
-        retlist = []
-        for po in protoObj:
-            msg = dict()
-            for fielddesc, value in po.ListFields():
-                # print value, type(value), getattr(value, '__iter__', False)
-                if fielddesc.type == descriptor.FieldDescriptor.TYPE_GROUP or \
-                        isinstance(value, RepeatedCompositeFieldContainer):
-                    msg[fielddesc.name] = self._toDict(value)
-                else:
-                    msg[fielddesc.name] = value
-            retlist.append(msg)
-        if not iterable:
-            if len(retlist) > 0:
-                return retlist[0]
-            else:
-                return None
-        return retlist
-
-    def setAuthSubToken(self, authSubToken):
-        self.authSubToken = authSubToken
-
-    @defer.inlineCallbacks
-    def login(self, email, password, accountType=ACCOUNT_TYPE_HOSTED_OR_GOOGLE):
-        encryptedPassword = gpsoauth.google.signature(email, password, gpsoauth.android_key_7_3_29)
-        params = {"Email": email, "EncryptedPasswd": encryptedPassword,
-                  "service": self.SERVICE,
-                  "accountType": accountType, "has_permission": "1",
-                  "source": "android", "android_id": self.android_id,
-                  "app": "com.android.vending", "sdk_version": "17",
-                  "add_account": "1"}
-        resp = yield treq.post(self.URL_LOGIN, params)
-        if resp.code == http.OK:
-            data = yield treq.content(resp)
-            data = data.split()
-            params = {}
-            for d in data:
-                k, v = d.decode().split("=", 1)
-                params[k.strip()] = v.strip()
-            if "Auth" in params:
-                self.setAuthSubToken(params["Auth"])
-                self.loggedIn = True
-            else:
-                raise LoginError("Auth token not found.")
-        else:
-            if resp.code == http.FORBIDDEN:
-                data = yield treq.content(resp)
-                print("resp.data: %s" % data)
-                params = {}
-                for d in data.decode().split('\n'):
-                    d = d.strip()
-                    if d:
-                        k, v = d.split("=", 1)
-                        params[k.strip().lower()] = v.strip()
-                if "error" in params:
-                    raise LoginError(params["error"])
-                else:
-                    raise LoginError("Login failed.")
-            else:
-                data = yield treq.content(resp)
-                raise LoginError("Login failed: error %d <%s>" % (resp.code, data.rstrip(),))
+            self.server.login(self.gp_login, self.gp_password)
+        self.android_id = str(self.server.gsfId)
+        self.auth_sub_token = self.server.authSubToken
+        self.logged_in = True
 
     @defer.inlineCallbacks
     def execute(self, url, params, lang):
         try:
-            headers = {"Authorization": "GoogleLogin auth=" + self.authSubToken,
-                       "Accept-Language": lang.encode("ascii"),
-                       "User-Agent": "Android-Market/2 (sapphire PLAT-RC33); gzip",
-                       "X-DFE-Device-Id": self.android_id,
-                       "X-DFE-Client-Id": "am-android-google",
-                       "X-DFE-Enabled-Experiments": "cl:billing.select_add_instrument_by_default",
-                       "X-DFE-SmallestScreenWidthDp": "320", "X-DFE-Filter-Level": "3",
-                       "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
+            headers = self.server.getHeaders()
             resp = yield treq.get(url, params=params, headers=headers)
             if resp.code == http.OK:
                 data = yield treq.content(resp)
-                response = market_proto.ResponseWrapper()
-                response.ParseFromString(data)
+                response = googleplay_pb2.ResponseWrapper.FromString(data)  # @UndefinedVariable
                 defer.returnValue(response)
             else:
                 data = yield treq.content(resp)
@@ -150,3 +72,9 @@ class MarketSession(object):
             for review in rp.reviewResponse.getResponse.review:
                 result.append(self._toDict(review))
         defer.returnValue(result)
+
+    def _toDict(self, protoObj):
+        msg = dict()
+        for fielddesc, value in protoObj.ListFields():
+            msg[fielddesc.name] = value
+        return msg
