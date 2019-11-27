@@ -49,6 +49,7 @@ class MarketSession(object):
     def execute(self, url, params, lang):
         try:
             headers = self.server.getHeaders()
+            headers["Accept-Language"] = lang.encode("ascii")
             resp = yield treq.get(url, params=params, headers=headers)
             if resp.code == http.OK:
                 data = yield treq.content(resp)
