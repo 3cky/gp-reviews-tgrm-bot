@@ -89,15 +89,17 @@ class GpReviewsWatcher(service.Service):
                             break  # request retries loop
                         except LoginError as le:
                             yield sleep(0)  # switch to the main thread
-                            log.msg('Google Play authorization failed, error: %s' % le)
+                            log.msg('Google Play authorization failed: %s' % le)
+                            session.resetAuthData()
                             defer.returnValue(None)
                         except RequestError as re:
                             yield sleep(0)  # switch to the main thread
+                            log.msg('Google Play request failed: %s' % re)
                             if re.err_code == 401:
-                                session.logged_in = False
+                                session.resetAuthData()
                             retry_num += 1
                             if retry_num > NUM_REQUEST_RETRIES:
-                                log.msg('Request retries limit exceeded, error: %s' % re)
+                                log.msg('Request retries limit exceeded, cause: %s' % re)
                                 defer.returnValue(None)
                         yield sleep(REQUEST_RETRY_TIMEOUT)
 

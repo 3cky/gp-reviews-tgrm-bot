@@ -9,7 +9,7 @@ import locale
 from twisted.internet import defer
 from twisted.web import http
 
-from gpapi.googleplay import GooglePlayAPI, googleplay_pb2
+from gpapi.googleplay import GooglePlayAPI, googleplay_pb2, RequestError as GpRequestError
 
 
 class RequestError(Exception):
@@ -29,21 +29,29 @@ class MarketSession(object):
     URL_REVIEWS = HOST_API_REQUEST + "rev"
 
     def __init__(self, gp_login, gp_password, android_id=None, auth_sub_token=None):
-        self.logged_in = False
+        self.resetAuthData()
         self.gp_login = gp_login
         self.gp_password = gp_password
         self.android_id = android_id
         self.auth_sub_token = auth_sub_token
         self.server = GooglePlayAPI(locale.getdefaultlocale()[0], None)
 
+    def resetAuthData(self):
+        self.logged_in = False
+        self.android_id = None
+        self.auth_sub_token = None
+
     def login(self):
-        if self.android_id and self.auth_sub_token:
-            self.server.login(None, None, int(self.android_id), self.auth_sub_token)
-        else:
-            self.server.login(self.gp_login, self.gp_password)
+        try:
+            if self.android_id and self.auth_sub_token:
+                self.server.login(gsfId=int(self.android_id), authSubToken=self.auth_sub_token)
+            else:
+                self.server.login(self.gp_login, self.gp_password)
+        except GpRequestError as gpe:
+            raise RequestError(gpe, 401)
+        self.logged_in = True
         self.android_id = str(self.server.gsfId)
         self.auth_sub_token = self.server.authSubToken
-        self.logged_in = True
 
     @defer.inlineCallbacks
     def execute(self, url, params, lang):
@@ -56,9 +64,10 @@ class MarketSession(object):
                 response = googleplay_pb2.ResponseWrapper.FromString(data)  # @UndefinedVariable
                 defer.returnValue(response)
             else:
-                data = yield treq.content(resp)
-                raise RequestError(str(data), resp.code)
-        except Exception as e:
+                err_data = yield treq.content(resp)
+                err_msg = str(err_data)
+                raise RequestError(err_msg, resp.code)
+        except RequestError as e:
             if isinstance(e, RequestError):
                 raise e
             raise RequestError(e)
