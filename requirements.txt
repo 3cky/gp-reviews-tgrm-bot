@@ -3,6 +3,7 @@ configparser
 twisted
 -e git://github.com/3cky/pyTelegramBotAPI.git#egg=TelegramBotAPI
 -e git://github.com/3cky/txTelegramBot.git#egg=txTelegramBot
+-e git://github.com/3cky/googleplay-api.git#egg=gpapi
 treq
 jinja2
 jinja2_pluralize
@@ -10,6 +11,5 @@ babel
 humanfriendly
 cryptography>=2.2
 protobuf>=3.5.2
-requests
+requests==2.23.0
 service_identity
--e git://github.com/Ksauder/googleplay-api.git#egg=googleplay-api
