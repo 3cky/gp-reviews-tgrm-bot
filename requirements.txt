@@ -9,7 +9,7 @@ jinja2
 jinja2_pluralize
 babel
 humanfriendly
-protobuf==3.13.0
+protobuf==3.15.0
 cryptography==3.1.1
 requests==2.23.0
 service_identity
