@@ -3,7 +3,7 @@ configparser
 twisted
 -e git+https://github.com/3cky/pyTelegramBotAPI.git#egg=TelegramBotAPI
 -e git+https://github.com/3cky/txTelegramBot.git#egg=txTelegramBot
--e git+https://github.com/marty0678/googleplay-api.git#egg=gpapi
+-e git+https://github.com/marty0678/googleplay-api.git@aa193ea198ac789f2b7d7a6650174078a93710a5#egg=gpapi
 treq
 jinja2
 jinja2_pluralize
