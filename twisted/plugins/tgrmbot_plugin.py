@@ -87,8 +87,12 @@ class ServiceManager(object):
 
         # read configuration file
         cfg = ConfigParser()
+        if hasattr(cfg, "read_file"):
+            reader = cfg.read_file
+        else:
+            reader = cfg.readfp
         with codecs.open(cfgFileName, 'r', encoding='utf-8') as f:
-            cfg.readfp(f)
+            reader(f)
 
         # get Google login and password from configuration
         if not cfg.has_option('google', 'login') or not cfg.has_option('google', 'password'):
