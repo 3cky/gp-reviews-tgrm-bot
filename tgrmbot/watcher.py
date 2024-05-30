@@ -8,6 +8,8 @@ Created on 20-Feb-2017
 import time
 import random
 
+from dateutil import parser
+
 from twisted.python import log
 from twisted.application import service
 from twisted.internet import reactor, defer
@@ -15,8 +17,6 @@ from twisted.internet import reactor, defer
 from tgrmbot.util import sleep
 
 from tgrmbot.googleplay.market import MarketSession, RequestError
-
-from gpapi.googleplay import LoginError
 
 REVIEW_TEMPLATE_NAME = 'review.md'
 
@@ -31,12 +31,11 @@ class GpReviewsWatcher(service.Service):
     '''
     name = 'tgrmbot_gp_watcher'
 
-    def __init__(self, db, templateRenderer, gp_login, gp_password,
+    def __init__(self, db, templateRenderer, gp_api_server,
                  poll_period, poll_delay, gp_langs):
         self.db = db
         self.templateRenderer = templateRenderer
-        self.gp_login = gp_login
-        self.gp_password = gp_password
+        self.gp_api_server = gp_api_server
         self.poll_period = poll_period
         self.poll_delay = poll_delay
         self.gp_langs = gp_langs
@@ -49,11 +48,7 @@ class GpReviewsWatcher(service.Service):
     @defer.inlineCallbacks
     def _run(self):
         # poll cycle loop
-        gp_android_id = gp_auth_token_id = None
-        gp_auth_data = yield self.db.get_gp_auth_data()
-        if gp_auth_data:
-            gp_android_id, gp_auth_token_id = gp_auth_data[0]
-        session = MarketSession(self.gp_login, self.gp_password, gp_android_id, gp_auth_token_id)
+        session = MarketSession(self.gp_api_server)
         while reactor.running:  # @UndefinedVariable
             yield self._check_app_reviews(session)
             # delay before next application reviews poll cycle
@@ -73,30 +68,14 @@ class GpReviewsWatcher(service.Service):
                     retry_num = 1
                     while True:  # request retries loop
                         try:
-                            if not session.logged_in:
-                                log.msg('Authorizing Google Play session...')
-                                yield sleep(0)  # switch to the main thread
-                                session.login()
-                                # update google play auth data
-                                yield self.db.update_gp_auth_data(session.android_id,
-                                                                  session.auth_sub_token)
-                                yield sleep(0)  # switch to the main thread
-
                             lang_reviews = yield self._get_app_reviews(session, app_id, app_name,
                                                                        gp_lang)
                             app_reviews.extend(lang_reviews)
 
                             break  # request retries loop
-                        except LoginError as le:
-                            yield sleep(0)  # switch to the main thread
-                            log.msg('Google Play authorization failed: %s' % le)
-                            session.resetAuthData()
-                            defer.returnValue(None)
                         except RequestError as re:
                             yield sleep(0)  # switch to the main thread
-                            log.msg('Google Play request failed: %s' % re)
-                            if re.err_code == 401:
-                                session.resetAuthData()
+                            log.msg('Google Play API server request failed: %s' % re)
                             retry_num += 1
                             if retry_num > NUM_REQUEST_RETRIES:
                                 log.msg('Request retries limit exceeded, cause: %s' % re)
@@ -131,11 +110,15 @@ class GpReviewsWatcher(service.Service):
         gp_reviews = yield session.getReviews(appid=app_name, lang=gp_lang)
         yield sleep(0)  # switch to main thread
         for gp_review in gp_reviews:
-            review_author_id = gp_review.get('commentId')
-            review_author_name = gp_review.get('authorName')
-            review_timestamp = gp_review.get('timestampMsec')
-            review_rating = gp_review.get('starRating')
-            review_comment = gp_review.get('comment')
+            review_author_id = gp_review.get('id')
+            review_author_name = gp_review.get('userName')
+            review_date = gp_review.get('date')
+            review_timestamp = int(parser.parse(review_date).timestamp()*1000)
+            review_rating = gp_review.get('score')
+            review_comment = gp_review.get('text')
+            review_title = gp_review.get('title')
+            review_app_version = gp_review.get('version')
+            review_url = gp_review.get('url')
             # check author is ignored
             author_ignored = yield self.check_author_ignored(review_author_id)
             if author_ignored:
@@ -149,11 +132,12 @@ class GpReviewsWatcher(service.Service):
                 yield self.db.add_review(app_id, review_author_id, review_author_name,
                                          review_timestamp, review_rating, review_comment, gp_lang)
                 app_reviews.append({'author': review_author_id,
+                                    'author_name': review_author_name,
                                     'timestamp': review_timestamp,
-                                    'version': gp_review.get('documentVersion'),
-                                    'device': gp_review.get('deviceName'),
+                                    'url': review_url,
+                                    'version': review_app_version,
                                     'rating': review_rating,
-                                    'title': gp_review.get('title'),
+                                    'title': review_title,
                                     'comment': review_comment,
                                     'lang': gp_lang})
             else:
@@ -167,11 +151,12 @@ class GpReviewsWatcher(service.Service):
                     yield self.db.update_review(review_id, review_timestamp,
                                                 review_rating, review_comment)
                     app_reviews.append({'author': review_author_id,
+                                        'author_name': review_author_name,
                                         'timestamp': review_timestamp,
-                                        'version': gp_review.get('documentVersion'),
-                                        'device': gp_review.get('deviceName'),
+                                        'url': review_url,
+                                        'version': review_app_version,
                                         'rating': review_rating,
-                                        'title': gp_review.get('title'),
+                                        'title': review_title,
                                         'comment': review_comment,
                                         'old_timestamp': old_review_timestamp,
                                         'old_timedelta': review_timestamp-old_review_timestamp,

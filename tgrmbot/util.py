@@ -67,10 +67,3 @@ def gp_app_url(app_name, lang=''):
     Get Google Play application page URL
     '''
     return GP_APP_URL.format(app_name=app_name, lang=lang)
-
-
-def gp_review_url(review_id, dev_id, app_name):
-    '''
-    Get Google Play developer console URL of application review
-    '''
-    return GP_REVIEW_URL.format(dev_id=dev_id, app_name=app_name, review_id=review_id)

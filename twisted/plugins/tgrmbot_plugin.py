@@ -43,6 +43,8 @@ DEFAULT_POLL_DELAY = 5
 
 DEFAULT_LANG = 'en'
 
+DEFAULT_GP_API_SERVER = 'http://localhost:3000'
+
 LOG_FORMAT = '[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s'
 
 
@@ -94,12 +96,10 @@ class ServiceManager(object):
         with codecs.open(cfgFileName, 'r', encoding='utf-8') as f:
             reader(f)
 
-        # get Google login and password from configuration
-        if not cfg.has_option('google', 'login') or not cfg.has_option('google', 'password'):
-            raise ConfigurationError('Google account login and password must be specified '
-                                     'in configuration file [account] section')
-        googleLogin = cfg.get('google', 'login')
-        googlePassword = cfg.get('google', 'password')
+        # get Google Play API server URL from configuration
+        gpApiServer = DEFAULT_GP_API_SERVER
+        if cfg.has_option('google', 'api_server'):
+            gpApiServer = cfg.get('google', 'api_server')
 
         # get Telegram token from configuration
         if not cfg.has_option('telegram', 'token'):
@@ -131,7 +131,7 @@ class ServiceManager(object):
         langs = [lang.strip() for lang in cfg.get('poll', 'lang').split(',')] \
             if cfg.has_option('poll', 'lang') else [DEFAULT_LANG]
 
-        watcher = GpReviewsWatcher(db, templateRenderer, googleLogin, googlePassword,
+        watcher = GpReviewsWatcher(db, templateRenderer, gpApiServer,
                                    pollPeriod, pollDelay, langs)
         watcher.setServiceParent(application)
 
