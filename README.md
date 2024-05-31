@@ -33,7 +33,17 @@ provided `doc/gp-reviews-tgrm-bot.cfg` as example. Minimal configuration include
 
 Run *gp-reviews-tgrm-bot* by command `twistd -n gp-reviews-tgrm-bot -c /path/to/config/file.cfg`.
 
-## Commands
+## Docker
+Run *gp-reviews-tgrm-bot* in container:
+
+```bash
+docker run -d --restart unless-stopped --name gp-reviews-tgrm-bot \
+        -v "/path/to/gp-reviews-tgrm-bot.ini:/app/config.ini" \
+        -v "/path/to/gp-reviews-tgrm-bot.sqlite:/app/db.sqlite" \
+        3cky/gp-reviews-tgrm-bot
+```
+
+## Bot commands
 
 Use `/help` to get list of available commands.
 
